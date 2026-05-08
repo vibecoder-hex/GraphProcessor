@@ -2,9 +2,9 @@
 using System;
 using System.Collections.Generic;
 using GraphProcessorAPI.Data;
-using GraphProcessorAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -13,21 +13,20 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GraphProcessorAPI.Migrations
 {
     [DbContext(typeof(GraphProcessorContext))]
-    partial class GraphProcessorContextModelSnapshot : ModelSnapshot
+    [Migration("20260502161155_Edit hash_paswword field max_length from 64 to 256")]
+    partial class Edithash_paswwordfieldmax_lengthfrom64to256
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "10.0.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "accountrole", new[] { "admin", "user" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "accountrole", "user_role", new[] { "user", "admin" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "algorithm_type", new[] { "bfs", "dfs", "dijkstra" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "algorithm_type", "algorithm_type", new[] { "dfs", "bfs", "dijkstra" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "graphtype", new[] { "non_oriented", "oriented" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "graphtype", "graph_type", new[] { "oriented", "non_oriented" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "accountrole", new[] { "User", "Admin" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "algorithm_type", new[] { "Dijkstra", "BFS", "DFS" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "graphtype", new[] { "Oriented", "Non-oriented" });
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("GraphProcessorAPI.Models.Edge", b =>
@@ -105,10 +104,6 @@ namespace GraphProcessorAPI.Migrations
                         .HasColumnType("json")
                         .HasColumnName("structure");
 
-                    b.Property<GraphType>("Type")
-                        .HasColumnType("graphtype")
-                        .HasColumnName("type");
-
                     b.Property<int>("UserId")
                         .HasColumnType("integer")
                         .HasColumnName("user_id");
@@ -174,10 +169,6 @@ namespace GraphProcessorAPI.Migrations
                         .HasColumnName("processing_result_id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ProcessingResultId"));
-
-                    b.Property<AlgorithmType>("Algorithm")
-                        .HasColumnType("algorithm_type")
-                        .HasColumnName("algorithm");
 
                     b.Property<int>("GraphId")
                         .HasColumnType("integer")
@@ -259,10 +250,6 @@ namespace GraphProcessorAPI.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")
                         .HasColumnName("phone");
-
-                    b.Property<UserRole>("Role")
-                        .HasColumnType("accountrole")
-                        .HasColumnName("role");
 
                     b.Property<string>("Username")
                         .IsRequired()

@@ -2,9 +2,9 @@
 using System;
 using System.Collections.Generic;
 using GraphProcessorAPI.Data;
-using GraphProcessorAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -13,20 +13,19 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GraphProcessorAPI.Migrations
 {
     [DbContext(typeof(GraphProcessorContext))]
-    partial class GraphProcessorContextModelSnapshot : ModelSnapshot
+    [Migration("20260505191117_switched to csharp enums")]
+    partial class switchedtocsharpenums
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "10.0.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "accountrole", new[] { "admin", "user" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "accountrole", "user_role", new[] { "user", "admin" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "algorithm_type", new[] { "bfs", "dfs", "dijkstra" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "algorithm_type", "algorithm_type", new[] { "dfs", "bfs", "dijkstra" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "graphtype", new[] { "non_oriented", "oriented" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "graphtype", "graph_type", new[] { "oriented", "non_oriented" });
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
@@ -105,7 +104,7 @@ namespace GraphProcessorAPI.Migrations
                         .HasColumnType("json")
                         .HasColumnName("structure");
 
-                    b.Property<GraphType>("Type")
+                    b.Property<int>("Type")
                         .HasColumnType("graphtype")
                         .HasColumnName("type");
 
@@ -175,7 +174,7 @@ namespace GraphProcessorAPI.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ProcessingResultId"));
 
-                    b.Property<AlgorithmType>("Algorithm")
+                    b.Property<int>("Algorithm")
                         .HasColumnType("algorithm_type")
                         .HasColumnName("algorithm");
 
@@ -260,7 +259,7 @@ namespace GraphProcessorAPI.Migrations
                         .HasColumnType("character varying(20)")
                         .HasColumnName("phone");
 
-                    b.Property<UserRole>("Role")
+                    b.Property<int>("Role")
                         .HasColumnType("accountrole")
                         .HasColumnName("role");
 

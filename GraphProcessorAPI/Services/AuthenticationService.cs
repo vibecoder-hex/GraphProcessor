@@ -1,7 +1,6 @@
-﻿using GraphProcessorAPI.Data;
-using GraphProcessorAPI.Models;
+﻿using GraphProcessorAPI.Models;
+using GraphProcessorAPI.Data;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -19,64 +18,9 @@ namespace GraphProcessorAPI.Services
         Task<LoginResult> Login(string username, string password);
     }
 
-    public interface IUserService
-    {
-        Task<UserResult> GetUserByNameAsync(string username);
-        Task<UserResult> AddUserAsync(string username, string passwordHash, string firstName, string lastName, string email, string phone);
-    }
-
     public interface IRegistrationService
     {
         Task<RegistrationResult> Register(string username, string password, string repeatPassword, string firstName, string lastName, string email, string phone);
-    }
-
-    public class UserService : IUserService
-    {
-        private readonly GraphProcessorContext _dbContext;
-        private readonly ILogger<UserService> _logger;
-
-        public UserService(GraphProcessorContext dbContext, ILogger<UserService> logger)
-        {
-            _dbContext = dbContext;
-            _logger = logger;
-        }
-
-        public async Task<UserResult> GetUserByNameAsync(string username)
-        {
-            var user = await _dbContext.Users
-                .SingleOrDefaultAsync(u => u.Username == username);
-
-            if (user == null)
-                return new UserResult { IsValid = false, ErrorMessage = $"User by {username} not found" };
-
-            _logger.LogInformation($"Successfull selected {user} by {username}");
-            return new UserResult { IsValid = true, SelectedUser = user };
-        }
-
-        public async Task<UserResult> AddUserAsync(string username, string passwordHash, string firstName, string lastName, string email, string phone)
-        {
-            var existingUserResult = await GetUserByNameAsync(username);
-            if (existingUserResult.IsValid)
-                return new UserResult { IsValid = false, ErrorMessage = $"User by {username} is already exists" };
-
-            var newUser = new User
-            {
-                Username = username,
-                PasswordHash = passwordHash,
-                FirstName = firstName,
-                LastName = lastName,
-                Email = email,
-                Phone = phone,
-                IsActive = true,
-                Role = UserRole.Admin,
-                CreatedAt = DateOnly.FromDateTime(DateTime.Now),
-                
-            };
-
-            _dbContext.Users.Add(newUser);
-            await _dbContext.SaveChangesAsync();
-            return new UserResult { IsValid = false, SelectedUser = newUser };
-        }
     }
 
     public class TokenService : ITokenService
@@ -87,10 +31,10 @@ namespace GraphProcessorAPI.Services
         {
             _configuration = configuration;
         }
-        public string GetJsonWebTokenString(string username) 
+        public string GetJsonWebTokenString(string username)
         {
-            var claims = new List<Claim> 
-            { 
+            var claims = new List<Claim>
+            {
                 new Claim(ClaimTypes.Name, username),
                 new Claim(ClaimTypes.Role, UserRole.Admin.ToString())
             };
@@ -109,10 +53,10 @@ namespace GraphProcessorAPI.Services
     public class LoginService : ILoginService
     {
         private readonly IPasswordHasher<User> _passwordHasher;
-        private readonly IUserService _userService;
+        private readonly IUserRepository _userService;
         private readonly ITokenService _tokenService;
 
-        public LoginService(IPasswordHasher<User> passwordHasher, IUserService userService, ITokenService tokenService)
+        public LoginService(IPasswordHasher<User> passwordHasher, IUserRepository userService, ITokenService tokenService)
         {
             _passwordHasher = passwordHasher;
             _userService = userService;
@@ -139,13 +83,13 @@ namespace GraphProcessorAPI.Services
     public class RegistrationService : IRegistrationService
     {
         private readonly IPasswordHasher<User> _passwordHasher;
-        private readonly IUserService _userService;
+        private readonly IUserRepository _userRepository;
         private readonly ITokenService _tokenService;
 
-        public RegistrationService(IPasswordHasher<User> passwordHasher, IUserService userService, ITokenService tokenService)
+        public RegistrationService(IPasswordHasher<User> passwordHasher, IUserRepository userRepository, ITokenService tokenService)
         {
             _passwordHasher = passwordHasher;
-            _userService = userService;
+            _userRepository = userRepository;
             _tokenService = tokenService;
         }
 
@@ -156,15 +100,16 @@ namespace GraphProcessorAPI.Services
 
         public async Task<RegistrationResult> Register(string username, string password, string repeatPassword, string firstName, string lastName, string email, string phone)
         {
+            var existingUserResult = await _userRepository.GetUserByNameAsync(username);
+            if (existingUserResult.IsValid)
+                return new RegistrationResult { IsValid = false, ErrorMessage = $"User by {username} is already exists" };
+
             if (!IsValidPasswords(password, repeatPassword))
                 return new RegistrationResult { IsValid = false, ErrorMessage = "Passwords is incorrect" };
 
             string passwordHash = _passwordHasher.HashPassword(null, password);
-            var hashVerificationResult = _passwordHasher.VerifyHashedPassword(null, passwordHash, password);
-            if (hashVerificationResult == PasswordVerificationResult.Failed)
-                return new RegistrationResult { IsValid = false, ErrorMessage = "Password hash verification filed" };
 
-            var userCreationResult = await _userService.AddUserAsync(username, passwordHash, firstName, lastName, email, phone);
+            var userCreationResult = await _userRepository.AddUserAsync(username, passwordHash, firstName, lastName, email, phone);
             if (!userCreationResult.IsValid)
                 return new RegistrationResult { IsValid = false, ErrorMessage = userCreationResult.ErrorMessage };
 

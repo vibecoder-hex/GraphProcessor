@@ -1,5 +1,6 @@
 ﻿using GraphProcessorAPI.Models;
 using GraphProcessorAPI.Services;
+using GraphProcessorAPI.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 
@@ -13,13 +14,13 @@ namespace GraphProcessorAPI.Controllers
         private readonly ILogger<UserController> _logger;
         private readonly ILoginService _loginService;
         private readonly IRegistrationService _registrationService;
-        private readonly IUserService _userService;
+        private readonly IUserRepository _userRepository;
         
-        public UserController(ILogger<UserController> logger, ILoginService loginService, IUserService userService, IRegistrationService registrationService)
+        public UserController(ILogger<UserController> logger, ILoginService loginService, IUserRepository userRepository, IRegistrationService registrationService)
         {
             _logger = logger;
             _loginService = loginService;
-            _userService = userService;
+            _userRepository = userRepository;
             _registrationService = registrationService;
         }
 
@@ -57,7 +58,7 @@ namespace GraphProcessorAPI.Controllers
             if (string.IsNullOrEmpty(username))
                 return Unauthorized(new { Error = "Username does not found in http context" });
 
-            var userResult = await _userService.GetUserByNameAsync(username);
+            var userResult = await _userRepository.GetUserByNameAsync(username);
             if (!userResult.IsValid)
                 return Unauthorized(new { Error = userResult.ErrorMessage });
 

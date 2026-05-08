@@ -34,7 +34,7 @@ builder.Services.AddProblemDetails();
 
 builder.Services.AddScoped<IDistanceGraphProcessorService, DistanceGraphProcessingService>();
 builder.Services.AddScoped<ILoginService, LoginService>();
-builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IRegistrationService, RegistrationService>();
