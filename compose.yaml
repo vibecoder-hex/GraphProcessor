@@ -7,10 +7,10 @@
     ports:
       - "8080:8080"
     environment:
-      - ConnectionStrings__DefaultConnection=${EFCORE_CONNECTIONSTRING}
-      - JwtParams__SecretKey=${JWTPARAMS_SECRET_KEY}
-      - JwtParams__Issuer=${JWTPARAMS_ISSUER}
-      - JwtParams__Audience=${JWTPARAMS_AUDIENCE}
+       ConnectionStrings__DefaultConnection: "${EFCORE_CONNECTIONSTRING}"
+       JwtParams__SecretKey: "${JWTPARAMS_SECRET_KEY}"
+       JwtParams__Issuer: "${JWTPARAMS_ISSUER}"
+       JwtParams__Audience: "${JWTPARAMS_AUDIENCE}"
     restart: unless-stopped
   
   graphprocessorfrontend:
