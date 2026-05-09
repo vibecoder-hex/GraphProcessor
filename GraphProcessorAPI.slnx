@@ -2,6 +2,9 @@
   <Folder Name="/Solution Items/">
     <File Path="compose.yaml" />
   </Folder>
+  <Folder Name="/Элементы решения/">
+    <File Path=".env" />
+  </Folder>
   <Project Path="GraphProcessorAPI/GraphProcessorAPI.csproj" />
   <Project Path="GraphProcessorTest/GraphProcessorTest.csproj" />
 </Solution>

@@ -7,10 +7,10 @@
     ports:
       - "8080:8080"
     environment:
-      - ConnectionStrings__DefaultConnection=Host=db;Database=graphProcessor;Username=vibecoderhex;Password=azsxdcQ1!
-      - JwtParams__SecretKey=qwertyuiop1234567890Q1!zxcvbnm,./;'[]'
-      - JwtParams__Issuer=VibeCoderHex
-      - JwtParams__Audience=VibeCoderHexUsers
+      - ConnectionStrings__DefaultConnection=${EFCORE_CONNECTIONSTRING}
+      - JwtParams__SecretKey=${JWTPARAMS_SECRET_KEY}
+      - JwtParams__Issuer=${JWTPARAMS_ISSUER}
+      - JwtParams__Audience=${JWTPARAMS_AUDIENCE}
     restart: unless-stopped
   
   graphprocessorfrontend:
@@ -26,9 +26,9 @@
     image: postgres:16
     restart: always
     environment:
-      POSTGRES_USER: vibecoderhex
-      POSTGRES_PASSWORD: azsxdcQ1!
-      POSTGRES_DB: graphProcessor
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
