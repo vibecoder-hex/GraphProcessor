@@ -14,8 +14,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GraphProcessorAPI.Migrations
 {
     [DbContext(typeof(GraphProcessorContext))]
-    [Migration("20260505192903_added enum mapping")]
-    partial class addedenummapping
+    [Migration("20260509165453_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

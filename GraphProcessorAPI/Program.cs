@@ -67,18 +67,35 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var app = builder.Build();
 
-app.UseSwagger();
-app.UseSwaggerUI();
-app.UseSwaggerUI(options =>
+using (var scope = app.Services.CreateScope())
 {
-    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Graph Processor API V1");
-    options.RoutePrefix = string.Empty;
-});
+    var db = scope.ServiceProvider.GetRequiredService<GraphProcessorContext>();
+    db.Database.Migrate();
+}
+
+
 
 app.UseHttpLogging();
 
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Graph Processor API V1");
+        options.RoutePrefix = string.Empty;
+    });
+}
+if (app.Environment.IsProduction())
+{
     app.UseExceptionHandler();
+    using (var scope = app.Services.CreateScope())
+    {
+        var db = scope.ServiceProvider.GetRequiredService<GraphProcessorContext>();
+        db.Database.Migrate();
+    }
+}
 
 app.MapControllers();
 
