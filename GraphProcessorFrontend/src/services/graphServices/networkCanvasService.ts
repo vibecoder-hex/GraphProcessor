@@ -50,7 +50,7 @@ export class NetworkCanvasProcessor {
             const fromNode: string | undefined = shortestPathArray[i]
             const toNode: string | undefined = shortestPathArray[i + 1]
             var connectedEdges = edges.get({
-                filter: (edge: Edge) => edge.from === fromNode && edge.to === toNode,
+                filter: (edge: Edge) => (edge.from === fromNode && edge.to === toNode) || (edge.from === toNode && edge.to === fromNode),
                 fields: ["id"]
             }).map((pickedEdge: Edge) => ({
                 id: pickedEdge.id,
