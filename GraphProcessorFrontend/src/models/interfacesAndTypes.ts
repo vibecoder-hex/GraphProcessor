@@ -24,12 +24,21 @@ export interface IDistanceStructureObject {
     }
 }
 
+export interface IAuthenticationResultObject {
+    tokenString: string
+}
+
 export interface IOperationResult {
     isValid: boolean,
     errorMessage: string,
 }
 
-export interface IResponseOperationResult {
+export interface IResponseOperationResult<T> {
     operation: IOperationResult,
-    responseData: IDistanceProcessingRootObject | null
+    responseData: T | null
+}
+
+export interface ILoginObject {
+    username: string,
+    password: string
 }

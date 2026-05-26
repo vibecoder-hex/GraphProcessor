@@ -43,8 +43,8 @@
       
     async function handleRequestedPath(): Promise<void> {
         const graphAlgorithmsRequests: IGraphAlgorithmsRequests = new GraphAlgorithmsRequests(APIURL, getObjectFromMap(), selectedAlgorithm.value, startVertex.value, targetVertex.value)
-        const pathRequest: IResponseOperationResult = await graphAlgorithmsRequests.getPathFromRequest();
-        if (pathRequest && pathRequest.operation.isValid) {
+        const pathRequest: IResponseOperationResult<IDistanceProcessingRootObject> = await graphAlgorithmsRequests.getPathFromRequest();
+        if (pathRequest.operation.isValid) {
             const shortestPath: IDistanceProcessingRootObject | null  = pathRequest.responseData
             if (shortestPath !== null) {
                 graphProcessingResult.value = shortestPath

@@ -1,8 +1,8 @@
 import axios from 'axios'
-import type { IGraphParametersObject, IResponseOperationResult, Algorithm } from "@/models/interfacesAndTypes.ts";
+import type { IGraphParametersObject, IResponseOperationResult, IDistanceProcessingRootObject, Algorithm } from "@/models/interfacesAndTypes.ts";
 
 export interface IGraphAlgorithmsRequests {
-    getPathFromRequest(): Promise<IResponseOperationResult>
+    getPathFromRequest(): Promise<IResponseOperationResult<IDistanceProcessingRootObject>>
 }
 
 export class GraphAlgorithmsRequests implements IGraphAlgorithmsRequests {
@@ -31,7 +31,7 @@ export class GraphAlgorithmsRequests implements IGraphAlgorithmsRequests {
         }
     }
     
-    public async getPathFromRequest(): Promise<IResponseOperationResult> {
+    public async getPathFromRequest(): Promise<IResponseOperationResult<IDistanceProcessingRootObject>> {
         try {
             const response = await axios.post(this.getSelectedUrl(), this._distanceJSONObject)
             return {
