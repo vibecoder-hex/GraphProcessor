@@ -1,4 +1,4 @@
-using GraphProcessorAPI.Data;
+using GraphProcessorAPI.Repositories;
 using GraphProcessorAPI.Models;
 using GraphProcessorAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

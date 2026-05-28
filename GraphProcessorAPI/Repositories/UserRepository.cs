@@ -1,12 +1,12 @@
 ﻿using GraphProcessorAPI.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace GraphProcessorAPI.Data
+namespace GraphProcessorAPI.Repositories
 {
     public interface IUserRepository
     {
-        Task<UserResult> GetUserByNameAsync(string username);
-        Task<UserResult> AddUserAsync(string username, string passwordHash, string firstName, string lastName, string email, string phone);
+        Task<User?> GetUserByNameAsync(string username);
+        Task<User?> AddUserAsync(string username, string passwordHash, string firstName, string lastName, string email, string phone);
     }
 
     public class UserRepository : IUserRepository
@@ -20,19 +20,16 @@ namespace GraphProcessorAPI.Data
             _logger = logger;
         }
 
-        public async Task<UserResult> GetUserByNameAsync(string username)
+        public async Task<User?> GetUserByNameAsync(string username)
         {
             var user = await _dbContext.Users
                 .FirstOrDefaultAsync(u => u.Username == username);
 
-            if (user == null)
-                return new UserResult { IsValid = false, ErrorMessage = $"User by {username} not found" };
-
             _logger.LogInformation($"Successfull selected {user} by {username}");
-            return new UserResult { IsValid = true, SelectedUser = user };
+            return user;
         }
 
-        public async Task<UserResult> AddUserAsync(string username, string passwordHash, string firstName, string lastName, string email, string phone)
+        public async Task<User?> AddUserAsync(string username, string passwordHash, string firstName, string lastName, string email, string phone)
         {
             var newUser = new User
             {
@@ -50,7 +47,7 @@ namespace GraphProcessorAPI.Data
 
             _dbContext.Users.Add(newUser);
             await _dbContext.SaveChangesAsync();
-            return new UserResult { IsValid = true, SelectedUser = newUser };
+            return newUser;
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using GraphProcessorAPI.Models;
 using GraphProcessorAPI.Services;
-using GraphProcessorAPI.Data;
+using GraphProcessorAPI.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 
@@ -58,18 +58,17 @@ namespace GraphProcessorAPI.Controllers
             if (string.IsNullOrEmpty(username))
                 return Unauthorized(new { Error = "Username does not found in http context" });
 
-            var userResult = await _userRepository.GetUserByNameAsync(username);
-            if (!userResult.IsValid)
-                return Unauthorized(new { Error = userResult.ErrorMessage });
-
-            var dbUser = userResult.SelectedUser;
+            var user = await _userRepository.GetUserByNameAsync(username);
+            if (user == null)
+                return Unauthorized(new { Error = "User not found" });
+            
             var userProfile = new UserProfileDto
             {
-                Username = dbUser.Username,
-                FirstName = dbUser.FirstName,
-                LastName = dbUser.LastName,
-                PhoneNumber = dbUser.Phone,
-                Email = dbUser.Email
+                Username = user.Username,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                PhoneNumber = user.Phone,
+                Email = user.Email
             };
 
             return Ok(userProfile);

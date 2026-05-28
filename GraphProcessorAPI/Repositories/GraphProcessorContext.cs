@@ -1,7 +1,7 @@
 ﻿using GraphProcessorAPI.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace GraphProcessorAPI.Data;
+namespace GraphProcessorAPI.Repositories;
 
 public partial class GraphProcessorContext : DbContext
 {

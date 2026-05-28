@@ -1,5 +1,5 @@
 ﻿using GraphProcessorAPI.Models;
-using GraphProcessorAPI.Data;
+using GraphProcessorAPI.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -10,7 +10,7 @@ namespace GraphProcessorAPI.Services
 {
     public interface ITokenService
     {
-        string GetJsonWebTokenString(string username);
+        string GetJsonWebTokenString(User user);
     }
 
     public interface ILoginService
@@ -31,12 +31,13 @@ namespace GraphProcessorAPI.Services
         {
             _configuration = configuration;
         }
-        public string GetJsonWebTokenString(string username)
+        public string GetJsonWebTokenString(User user)
         {
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, username),
-                new Claim(ClaimTypes.Role, UserRole.Admin.ToString())
+                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Role, user.Role.ToString()),
             };
             var jwtToken = new JwtSecurityToken
                 (
@@ -65,17 +66,16 @@ namespace GraphProcessorAPI.Services
 
         public async Task<LoginResult> Login(string username, string password)
         {
-            var userResult = await _userService.GetUserByNameAsync(username);
-            if (!userResult.IsValid)
-                return new LoginResult { IsValid = false, ErrorMessage = userResult.ErrorMessage };
-
-            var user = userResult.SelectedUser;
+            var user = await _userService.GetUserByNameAsync(username);
+            if (user == null)
+                return new LoginResult { IsValid = false, ErrorMessage = $"User by username {username} not found" };
+            
             var verificationResult = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, password);
 
             if (verificationResult == PasswordVerificationResult.Failed)
                 return new LoginResult { IsValid = false, ErrorMessage = "Invalid password"};
 
-            var tokenString = _tokenService.GetJsonWebTokenString(username);
+            var tokenString = _tokenService.GetJsonWebTokenString(user);
             return new LoginResult { IsValid = true, TokenString = tokenString };
         }
     }
@@ -100,20 +100,19 @@ namespace GraphProcessorAPI.Services
 
         public async Task<RegistrationResult> Register(string username, string password, string repeatPassword, string firstName, string lastName, string email, string phone)
         {
-            var existingUserResult = await _userRepository.GetUserByNameAsync(username);
-            if (existingUserResult.IsValid)
-                return new RegistrationResult { IsValid = false, ErrorMessage = $"User by {username} is already exists" };
-
             if (!IsValidPasswords(password, repeatPassword))
                 return new RegistrationResult { IsValid = false, ErrorMessage = "Passwords is incorrect" };
+            
+            var existingUser = await _userRepository.GetUserByNameAsync(username);
+            if (existingUser != null)
+                return new RegistrationResult { IsValid = false, ErrorMessage = $"User by {username} is already exists" };
+            
 
             string passwordHash = _passwordHasher.HashPassword(null, password);
 
-            var userCreationResult = await _userRepository.AddUserAsync(username, passwordHash, firstName, lastName, email, phone);
-            if (!userCreationResult.IsValid)
-                return new RegistrationResult { IsValid = false, ErrorMessage = userCreationResult.ErrorMessage };
+            var createdUser = await _userRepository.AddUserAsync(username, passwordHash, firstName, lastName, email, phone);
 
-            string tokenString = _tokenService.GetJsonWebTokenString(username);
+            string tokenString = _tokenService.GetJsonWebTokenString(createdUser);
             return new RegistrationResult { IsValid = true, TokenString = tokenString };
         }
     }
