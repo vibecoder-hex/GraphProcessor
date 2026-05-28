@@ -1,6 +1,6 @@
 ﻿using GraphProcessorAPI.Services;
 using GraphProcessorAPI.Models;
-using GraphProcessorAPI.Data;
+using GraphProcessorAPI.Repositories;
 using Moq;
 using Microsoft.AspNetCore.Identity;
 
@@ -39,7 +39,7 @@ namespace GraphProcessorTest.UserServices
             };
 
             _mockUserRepository.Setup(repo => repo.GetUserByNameAsync(user.Username))
-                .ReturnsAsync(new UserResult { IsValid = true, SelectedUser = user });
+                .ReturnsAsync(user);
             _mockPasswordHasher.Setup(hasher => hasher.VerifyHashedPassword(user, user.PasswordHash, "azsxdcQ1!"))
                 .Returns(PasswordVerificationResult.Success);
 
@@ -54,15 +54,9 @@ namespace GraphProcessorTest.UserServices
             var password = "SafePassword123!";
             var fakeHash = "hashed_password_string";
             var fakeToken = "penis";
-
-            _mockPasswordHasher.Setup(hasher => hasher.HashPassword(null, password))
-                .Returns(fakeHash);
+            
             _mockUserRepository.Setup(repo => repo.GetUserByNameAsync(username))
-                .ReturnsAsync(new UserResult { IsValid = true });
-            _mockUserRepository.Setup(repo => repo.AddUserAsync(username, fakeHash, "Simon", "Babushkin", "rty.sem@yandex.ru", "+79251627733"))
-                .ReturnsAsync(new UserResult { IsValid = true });
-            _mockTokenService.Setup(token => token.GetJsonWebTokenString(fakeHash))
-                .Returns(fakeToken);
+                .ReturnsAsync(new User { Username =  username });
 
             var result = await _registrationService.Register(username, password, password, "Simon", "Babushkin", "rty.sem@yandex.ru", "+79251627733");
             Assert.False(result.IsValid);
@@ -76,13 +70,13 @@ namespace GraphProcessorTest.UserServices
             var fakeHash = "hashed_password_string";
             var fakeToken = "penis";
 
-            _mockPasswordHasher.Setup(hasher => hasher.HashPassword(null, password))                                                                                             
-                .Returns(fakeHash);
             _mockUserRepository.Setup(repo => repo.GetUserByNameAsync(username))
-                .ReturnsAsync(new UserResult { IsValid = false });
+                .ReturnsAsync((User?)null);
+            _mockPasswordHasher.Setup(hasher => hasher.HashPassword(It.IsAny<User?>(), password))                                                                                             
+                .Returns(fakeHash);
             _mockUserRepository.Setup(repo => repo.AddUserAsync(username, fakeHash, "Bibos", "Biven", "rty.sem@yandex.ru", "+79251627733"))
-                .ReturnsAsync(new UserResult { IsValid = true });
-            _mockTokenService.Setup(token => token.GetJsonWebTokenString(username))
+                .ReturnsAsync(It.IsAny<User?>());
+            _mockTokenService.Setup(token => token.GetJsonWebTokenString(It.IsAny<User?>()))
                 .Returns(fakeToken);
 
             var result = await _registrationService.Register(username, password, password, "Bibos", "Biven", "rty.sem@yandex.ru", "+79251627733");
