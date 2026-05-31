@@ -42,3 +42,12 @@ export interface ILoginObject {
     username: string,
     password: string
 }
+
+export interface IJwtPayloadComponent {
+        userId: number,
+        username: string,
+        userRole: string,
+        expire: number,
+        issure: string,
+        audence: string
+    }

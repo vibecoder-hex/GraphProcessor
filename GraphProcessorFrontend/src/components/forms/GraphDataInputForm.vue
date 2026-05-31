@@ -12,7 +12,7 @@
       Algorithm,
       GraphType
     } from "@/models/interfacesAndTypes.ts"
-    import  { type IGraphAlgorithmsRequests, GraphAlgorithmsRequests } from "@/services/http_requests/GraphAlgorithmsRequests.ts";
+    import  { type IGraphAlgorithmsRequests, GraphAlgorithmsRequests } from "@/services/httpServices/GraphAlgorithmsRequests.ts";
     import {NetworkCanvasProcessor} from "@/services/graphServices/networkCanvasService.ts";
     import { DataSet, type Edge, type Node } from "vis-network/standalone"
 
