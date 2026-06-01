@@ -1,6 +1,6 @@
 <script setup lang="ts">
     import LoginDataField from './form_components/fields/LoginDataField.vue';
-    import { LoginRequests, TokenProvider } from '@/services/httpServices/AuthenticationRequests.ts';
+    import { LoginRequests } from '@/services/httpServices/AuthenticationRequests.ts';
     import type { IAuthenticationResultObject, IResponseOperationResult } from '@/models/interfacesAndTypes.ts';
     import { useAuthenticationStore } from '@/stores/index.ts';
     import { ref } from "vue";
@@ -21,8 +21,7 @@
         if (loginResponse.operation.isValid) {
             const accessToken: IAuthenticationResultObject | null = loginResponse.responseData;
             if (accessToken != null) {
-                TokenProvider.setToken(accessToken.tokenString)
-                authStore.setTokenInState(accessToken.tokenString)
+                authStore.setToken(accessToken.tokenString)
                 authResultMessage.value = "Authentication successfull";
                 errorMessage.value = "";
                 

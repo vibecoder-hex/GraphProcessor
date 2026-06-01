@@ -44,7 +44,7 @@ namespace GraphProcessorAPI.Services
                    issuer: _configuration["JwtParams:Issuer"],
                    audience: _configuration["JwtParams:Audience"],
                    claims: claims,
-                   expires: DateTime.UtcNow.AddSeconds(15),
+                   expires: DateTime.UtcNow.AddSeconds(60),
                    signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtParams:SecretKey"])), SecurityAlgorithms.HmacSha256)
                 );
             return new JwtSecurityTokenHandler().WriteToken(jwtToken);

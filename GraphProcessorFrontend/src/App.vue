@@ -14,17 +14,17 @@
 
 <script setup lang="ts">
     import { useAuthenticationStore } from './stores';
-    import { TokenProvider } from './services/httpServices/AuthenticationRequests';
     import { onMounted } from 'vue';
+    import { TokenProcessor } from './services/httpServices/AuthenticationRequests';
 
     const authStore = useAuthenticationStore()
     
     onMounted(() => {
-        const jwtToken = TokenProvider.getToken()
+        const jwtToken = authStore.token
         if (jwtToken !== null) {
-            if (!TokenProvider.isTokenValid(jwtToken)) {
-                authStore.deleteTokenFromState()
-                TokenProvider.removeToken()
+            const tokenProcessor = new TokenProcessor(jwtToken)
+            if (!tokenProcessor.isTokenValid()) {
+                authStore.deleteToken()
             }
         }
     })

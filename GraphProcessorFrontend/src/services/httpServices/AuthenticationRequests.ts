@@ -10,11 +10,24 @@ export interface IRegistrationRequests {
     register(): Promise<IResponseOperationResult<IAuthenticationResultObject>>
 }
 
-export class TokenProvider  {
+export interface ITokenProcessor {
+    getUserId(): string | undefined,
+    getUsername(): string | undefined,
+    getUserRole(): string | undefined,
+    getTokenExpire(): Date | undefined,
+    isTokenValid(): boolean | undefined
+}
 
-    private static decodeJsonWebToken(webToken: string): IJwtPayloadComponent | null {
+export class TokenProcessor implements ITokenProcessor  {
+    private readonly _webToken: string
+
+    constructor(webToken: string) {
+        this._webToken = webToken
+    }
+
+    private decodeJsonWebToken(): IJwtPayloadComponent | null {
         const BASE64_SYMBOL_COUNT = 4;
-        const tokenParts: string[] = webToken.split('.')
+        const tokenParts: string[] = this._webToken.split('.')
         if (tokenParts.length !== 3) {
             throw new Error("Invalid token parts count")
         }
@@ -32,49 +45,40 @@ export class TokenProvider  {
                 case 0:
                     break;
             }
-            const decodedString: string = atob(payloadPart)
-            const payloadObject: IJwtPayloadComponent = JSON.parse(decodedString)
-            return payloadObject
+            try {
+                const decodedString: string = atob(payloadPart)
+                const payloadObject: IJwtPayloadComponent = JSON.parse(decodedString)
+                return payloadObject
+            } catch (error) {
+                console.error("failed to parse/decode token", error)
+            }
+
         }
         return null
     }
 
-    public static setToken(webToken: string): void {
-        localStorage.setItem("token", webToken)
+    public getUserId(): string | undefined {
+        return this.decodeJsonWebToken()?.["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"]
     }
 
-    public static getToken(): string | null {
-        return localStorage.getItem("token");
-    }
-    
-    public static removeToken(): void {
-        localStorage.removeItem("token")
+    public getUsername(): string | undefined {
+        return this.decodeJsonWebToken()?.["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"]
     }
 
-    public static getUserId(webToken: string): number | undefined {
-        return this.decodeJsonWebToken(webToken)?.userId
+    public getUserRole(): string | undefined {
+        return this.decodeJsonWebToken()?.["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"]
     }
 
-    public static getUsername(webToken: string): string | undefined {
-        return this.decodeJsonWebToken(webToken)?.username
-    }
-
-    public static getUserRole(webToken: string): string | undefined {
-        return this.decodeJsonWebToken(webToken)?.userRole
-    }
-
-    public static getTokenExpire(webToken: string): Date | undefined {
-        const tokenExpire = this.decodeJsonWebToken(webToken)?.expire
+    public getTokenExpire(): Date | undefined {
+        const tokenExpire = this.decodeJsonWebToken()?.exp
         if (tokenExpire !== undefined) {
             return new Date(tokenExpire * 1000);
         }
         return undefined;
     }
 
-    public static isTokenValid(webToken: string): boolean {
-        if (!webToken)
-            return false
-        const expire = this.getTokenExpire(webToken)
+    public isTokenValid(): boolean {
+        const expire = this.getTokenExpire()
         if (!expire)
             return false
         if (expire.getTime() < Date.now())
