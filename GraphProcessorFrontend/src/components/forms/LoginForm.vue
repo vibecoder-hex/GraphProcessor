@@ -39,16 +39,36 @@
 </script>
 
 <template>
-    <h1 class="is-size-3">Login</h1>
-    <LoginDataField v-model:username="username" v-model:password="password"/>
-    <p class="has-text-danger">{{ errorMessage }}</p>
-    <p class="has-text-success">{{ authResultMessage }}</p>
-    <button class="button is-success" @click="handleLogin()">Sign in</button>
-    <div v-if="authStore.isAuthenticated">
-        <p class="has-text-success">User has been authenticated</p>
+    <div class="login-form">
+        <h1 class="is-size-3">Login</h1>
+        <LoginDataField v-model:username="username" v-model:password="password"/>
+        <p class="has-text-danger">{{ errorMessage }}</p>
+        <p class="has-text-success">{{ authResultMessage }}</p>
+        <button class="button is-success" @click="handleLogin()">Sign in</button>
+        <div v-if="authStore.isAuthenticated">
+            <p class="has-text-success">User has been authenticated</p>
+        </div>
     </div>
+
 </template>
 
 <style scoped>
+    .login-form {
+        
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin: 0 auto;
+    }
+    @media (min-width: 1000px) {
+        .login-form {
+            width: 40%;
+        }
+    }
+    @media (max-width: 720px) {
+        .login-form {
+            width: 90%;
+        }
+    }
 
 </style>

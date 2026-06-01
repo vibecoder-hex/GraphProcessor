@@ -50,4 +50,12 @@ export interface IJwtPayloadComponent {
     exp: number,
     iss: string,
     aud: string
-    }
+}
+
+export interface IUserProfileData {
+    username: string,
+    firstName: string,
+    lastName: string,
+    phoneNumber: string,
+    email: string
+}
