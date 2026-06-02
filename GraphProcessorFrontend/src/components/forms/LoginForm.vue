@@ -42,7 +42,7 @@
     <div class="login-container">
         <article class="message is-primary">
             <div class="message-header">
-                <p>User Login</p>
+                <p>Sign In</p>
             </div>
             <div class="message-body">
                 <div class="card">
@@ -64,7 +64,7 @@
 
                         <!-- Authentication Status -->
                         <div v-if="authStore.isAuthenticated" class="notification is-success is-light">
-                            <p class="has-text-success">✓ User successfully authenticated</p>
+                            <p class="has-text-success">✓ Пользователь успешно аутентифицирован</p>
                         </div>
                     </div>
 
@@ -75,7 +75,7 @@
                                 class="button is-primary is-fullwidth" 
                                 @click="handleLogin()"
                             >
-                                Sign in
+                                Sign In
                             </button>
                         </a>
                     </div>
