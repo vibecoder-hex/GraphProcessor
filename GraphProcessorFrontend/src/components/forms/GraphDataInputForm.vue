@@ -63,32 +63,55 @@
 
 <template>
     <form @submit.prevent>
-        <GraphTypeSelector v-model:selectedGraphType="selectedGraphType" v-model:isGraphTypeSelected="isGraphTypeSelected"></GraphTypeSelector>
-        <UserInputVertexField v-if="isGraphTypeSelected"
-                              v-model:selectedGraphType="selectedGraphType"
-                              v-model:distanceMap="distanceMap"
-                              v-model:visEdges="visEdges"
-                              v-model:visNodes="visNodes"/>
-        <div v-if="distanceMap.size > 0" class="graph-structure">
-           <AlgorithmSelector v-model:selectedAlgorithm="selectedAlgorithm" />
-           <PathSearchField v-model:selectedAlgorithm="selectedAlgorithm"
-                                     v-model:startVertex="startVertex"
-                                     v-model:targetVertex="targetVertex"
-            />
-            <button class="button is-primary" @click="handleRequestedPath()">Send path</button>
-            <div v-if="graphProcessingResult">
-                <DistanceProcessingResult :result="graphProcessingResult.result"/>
+        <div class="form-wrapper">
+            <GraphTypeSelector v-model:selectedGraphType="selectedGraphType" v-model:isGraphTypeSelected="isGraphTypeSelected"></GraphTypeSelector>
+            <UserInputVertexField v-if="isGraphTypeSelected"
+                                  v-model:selectedGraphType="selectedGraphType"
+                                  v-model:distanceMap="distanceMap"
+                                  v-model:visEdges="visEdges"
+                                  v-model:visNodes="visNodes"/>
+            <div v-if="distanceMap.size > 0" class="graph-structure">
+               <AlgorithmSelector v-model:selectedAlgorithm="selectedAlgorithm" />
+               <PathSearchField v-model:selectedAlgorithm="selectedAlgorithm"
+                                         v-model:startVertex="startVertex"
+                                         v-model:targetVertex="targetVertex"
+                />
+                <button class="button is-primary" @click="handleRequestedPath()">Send path</button>
+                <div v-if="graphProcessingResult">
+                    <DistanceProcessingResult :result="graphProcessingResult.result"/>
+                </div>
+                <div class="notification is-danger is-light" v-if="errorMessage">{{ errorMessage }}</div>
             </div>
-            <div>{{ errorMessage }}</div>
         </div>
     </form>
 </template>
 
 
 <style scoped>
+    .form-wrapper {
+        background-color: #f5f5f5;
+        border-radius: 8px;
+        padding: 2rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
     .graph-structure {
         display: flex;
         flex-direction: column;
         gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+        .form-wrapper {
+            padding: 1.5rem;
+            margin: 0 1rem;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .form-wrapper {
+            padding: 1rem;
+            margin: 0 0.5rem;
+        }
     }
 </style>

@@ -3,7 +3,7 @@
     import type { IResponseOperationResult, IUserProfileData } from '@/models/interfacesAndTypes';
 
     import { ProfileRequests } from '@/services/httpServices/AccountRequests';
-    import { ref, watch, nextTick } from 'vue'
+    import { ref } from 'vue'
     import { useAuthenticationStore } from '@/stores';
     import { useRouter } from "vue-router"
 

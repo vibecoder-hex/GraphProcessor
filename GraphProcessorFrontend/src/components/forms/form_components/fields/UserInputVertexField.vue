@@ -60,65 +60,131 @@
 </script>
 
 <template>
-    <p class="is-size-5">Please enter graph parameters</p>
-    <div class="user-input">
-        <div class="node-input card">
-            <div class="card-content">
-                <div class="content">
-                    <p class="is-size-5">Enter Nodes</p>
-                    <label class="label">Node name:</label>
-                    <input class="input" v-model="nodeNameValue" type="text"><br><br>
-                    <button :disabled="!isValidNodeName" class="button" @click="handleNodesOperation(NodeMethods.addNode(nodeNameValue, distanceMap, visNodes))">Add Node</button> <button :disabled="!isValidNodeName" class="button" @click="handleNodesOperation(NodeMethods.deleteNode(nodeNameValue, distanceMap, visNodes))" >Delete node</button>
-                    <p class="has-text-warning">{{ nodeCardMessage }}</p>
-                </div>  
-            </div>
-        </div>  
-        <br>
-        <div class="edge-input card">
-            <div class="card-content">
-                <div class="content">
-                    <p class="is-size-5">Enter Edges</p>
-                    <label>From: </label>
-                    <input class="input" v-model="fromNodeValue" type="text">
-                    <label>To: </label>
-                    <input class="input" v-model="toNodeValue" type="text">
-                    <label>Distance</label>
-                    <input @change="showInvalidDistanceNumberError()" class="input" v-model="distanceNumber" type="number"><br><br>
-                    <button :disabled="!isValidFromNodeValue || !isValidToNodeValue || !isValidDistanceNumber" class="button" @click="handleEdgeMethods(EdgeMethods.addEdge(fromNodeValue, toNodeValue, distanceNumber, distanceMap, visEdges, selectedGraphType))">Add path</button> <button :disabled="!isValidFromNodeValue || !isValidToNodeValue" class="button" @click="handleEdgeMethods(EdgeMethods.deleteEdge(fromNodeValue, toNodeValue, distanceMap, visEdges, selectedGraphType))">Delete path</button>
+    <article class="message is-dark">
+        <div class="message-header">
+            <p>Graph Input Parameters</p>
+        </div>
+        <div class="message-body">
+            <div class="user-input">
+                <!-- Node Input Section -->
+                <div class="node-section">
+                    <div class="card">
+                        <div class="card-content">
+                            <p class="is-size-5 mb-3">Add Nodes</p>
+                            <div class="field">
+                                <label class="label">Node name:</label>
+                                <div class="control">
+                                    <input class="input" v-model="nodeNameValue" type="text">
+                                </div>
+                            </div>
+                            <div class="field is-grouped">
+                                <div class="control">
+                                    <button :disabled="!isValidNodeName" class="button is-info" @click="handleNodesOperation(NodeMethods.addNode(nodeNameValue, distanceMap, visNodes))">Add Node</button>
+                                </div>
+                                <div class="control">
+                                    <button :disabled="!isValidNodeName" class="button is-warning" @click="handleNodesOperation(NodeMethods.deleteNode(nodeNameValue, distanceMap, visNodes))" >Delete Node</button>
+                                </div>
+                            </div>
+                            <div v-if="nodeCardMessage" class="notification is-danger is-light">
+                                {{ nodeCardMessage }}
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <p class="has-text-warning">{{ edgeCardMessage }}</p>
+
+                <!-- Edge Input Section -->
+                <div class="edge-section">
+                    <div class="card">
+                        <div class="card-content">
+                            <p class="is-size-5 mb-3">Add Edges</p>
+                            <div class="field">
+                                <label class="label">From:</label>
+                                <div class="control">
+                                    <input class="input" v-model="fromNodeValue" type="text">
+                                </div>
+                            </div>
+                            <div class="field">
+                                <label class="label">To:</label>
+                                <div class="control">
+                                    <input class="input" v-model="toNodeValue" type="text">
+                                </div>
+                            </div>
+                            <div class="field">
+                                <label class="label">Distance:</label>
+                                <div class="control">
+                                    <input @change="showInvalidDistanceNumberError()" class="input" v-model="distanceNumber" type="number">
+                                </div>
+                            </div>
+                            <div class="field is-grouped">
+                                <div class="control">
+                                    <button :disabled="!isValidFromNodeValue || !isValidToNodeValue || !isValidDistanceNumber" class="button is-success" @click="handleEdgeMethods(EdgeMethods.addEdge(fromNodeValue, toNodeValue, distanceNumber, distanceMap, visEdges, selectedGraphType))">Add Edge</button>
+                                </div>
+                                <div class="control">
+                                    <button :disabled="!isValidFromNodeValue || !isValidToNodeValue" class="button is-warning" @click="handleEdgeMethods(EdgeMethods.deleteEdge(fromNodeValue, toNodeValue, distanceMap, visEdges, selectedGraphType))">Delete Edge</button>
+                                </div>
+                            </div>
+                            <div v-if="edgeCardMessage" class="notification is-danger is-light">
+                                {{ edgeCardMessage }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-    <div v-if="distanceMap.size > 0">
-        <label>Show graph canvas</label> 
-        <input type="checkbox" v-model="showCanvas">
+    </article>
+
+    <!-- Graph Canvas Section -->
+    <div v-if="distanceMap.size > 0" class="canvas-section">
+        <div class="field">
+            <div class="control">
+                <label class="checkbox">
+                    <input type="checkbox" v-model="showCanvas">
+                    Show graph canvas
+                </label>
+            </div>
+        </div>
         <div v-if="showCanvas">
             <NetworkVisualizationCanvas :visNodes="visNodes" :visEdges="visEdges"/>
-            <button class="button is-danger" @click="NetworkCanvasProcessor.ResetColors(visEdges)">Reset edge colors</button>
+            <div class="mt-3">
+                <button class="button is-danger" @click="NetworkCanvasProcessor.ResetColors(visEdges)">Reset edge colors</button>
+            </div>
         </div>
     </div>
     
 </template>
 
 <style scoped>
+    .mb-3 {
+        margin-bottom: 1.5rem;
+    }
+
+    .mt-3 {
+        margin-top: 1.5rem;
+    }
+
+    .card {
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .canvas-section {
+        margin-top: 2rem;
+    }
+
     @media (min-width: 1000px) {
         .user-input {
-            display: flex;
-            flex-direction: row;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 20px;
-            margin-top: 20px;
+            margin-top: 0;
         }
-      .card {
-          flex: 1;
-      }
     }
-    @media (max-width: 640px) {
-        .user-input{
+
+    @media (max-width: 999px) {
+        .user-input {
             display: flex;
             flex-direction: column;
             gap: 20px;
-            margin-top: 20px;
+            margin-top: 0;
         }
     }
 </style>

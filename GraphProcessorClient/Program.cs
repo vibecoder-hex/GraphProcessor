@@ -163,7 +163,7 @@ namespace GraphProcessorClient
         public async static Task Main(string[] args)
         {
             var httpClient = new HttpClient();
-            string baseUrl = "http://213.171.29.203/api";
+            string baseUrl = "http://localhost:5170/api";
             while (true)
             {
                 Console.WriteLine("1. Login\n2. Register\n3. Profile");
