@@ -62,96 +62,40 @@
 </script>
 
 <template>
-    <form @submit.prevent class="form-wrapper">
-        <div class="form-container">
-            <!-- Graph Type Selection -->
-            <GraphTypeSelector v-model:selectedGraphType="selectedGraphType" v-model:isGraphTypeSelected="isGraphTypeSelected"></GraphTypeSelector>
-
-            <!-- User Input Section -->
-            <UserInputVertexField v-if="isGraphTypeSelected"
-                                  v-model:selectedGraphType="selectedGraphType"
-                                  v-model:distanceMap="distanceMap"
-                                  v-model:visEdges="visEdges"
-                                  v-model:visNodes="visNodes"/>
-
-            <!-- Graph Processing Section -->
-            <div v-if="distanceMap.size > 0" class="graph-structure">
-                <AlgorithmSelector v-model:selectedAlgorithm="selectedAlgorithm" />
-                <PathSearchField v-model:selectedAlgorithm="selectedAlgorithm"
-                                         v-model:startVertex="startVertex"
-                                         v-model:targetVertex="targetVertex"
-                />
-                <button class="button is-primary is-fullwidth" @click="handleRequestedPath()">Find Shortest Path</button>
-
-                <!-- Error Message -->
-                <div v-if="errorMessage" class="notification is-danger is-light">
-                    <button class="delete"></button>
-                    {{ errorMessage }}
-                </div>
-
-                <!-- Results -->
-                <div v-if="graphProcessingResult">
-                    <DistanceProcessingResult :result="graphProcessingResult.result"/>
-                </div>
+    <form @submit.prevent>
+        <GraphTypeSelector v-model:selectedGraphType="selectedGraphType" v-model:isGraphTypeSelected="isGraphTypeSelected"></GraphTypeSelector>
+        <UserInputVertexField v-if="isGraphTypeSelected"
+                              v-model:selectedGraphType="selectedGraphType"
+                              v-model:distanceMap="distanceMap"
+                              v-model:visEdges="visEdges"
+                              v-model:visNodes="visNodes"/>
+        <div v-if="distanceMap.size > 0" class="graph-structure">
+           <AlgorithmSelector v-model:selectedAlgorithm="selectedAlgorithm" />
+           <PathSearchField v-model:selectedAlgorithm="selectedAlgorithm"
+                                     v-model:startVertex="startVertex"
+                                     v-model:targetVertex="targetVertex"
+            />
+            <button class="button is-primary" @click="handleRequestedPath()">Send path</button>
+            <div v-if="graphProcessingResult">
+                <DistanceProcessingResult :result="graphProcessingResult.result"/>
             </div>
+            <div>{{ errorMessage }}</div>
         </div>
     </form>
 </template>
 
 
 <style scoped>
-    .form-wrapper {
-        width: 100%;
-    }
-
-    .form-container {
-        background-color: #e8e8e8;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        padding: 2rem;
-    }
-
     .graph-structure {
         display: flex;
         flex-direction: column;
-        gap: 1.5rem;
-        margin-top: 1.5rem;
-        padding-top: 1.5rem;
-        border-top: 2px solid #d0d0d0;
+        gap: 20px;
     }
 
-    .notification {
-        margin: 0;
-    }
-
-    /* Tablet layout */
-    @media (max-width: 1000px) and (min-width: 641px) {
-        .form-container {
-            padding: 1.5rem;
-        }
-
+    @media (max-width: 720px) {
         .graph-structure {
+            padding: 0 1.5rem;
             gap: 1rem;
-            margin-top: 1rem;
-            padding-top: 1rem;
-        }
-    }
-
-    /* Mobile layout with edge padding */
-    @media (max-width: 640px) {
-        .form-wrapper {
-            padding: 0 1rem;
-        }
-
-        .form-container {
-            padding: 1rem;
-            border-radius: 8px;
-        }
-
-        .graph-structure {
-            gap: 1rem;
-            margin-top: 1rem;
-            padding-top: 1rem;
         }
     }
 </style>

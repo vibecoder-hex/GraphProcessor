@@ -60,215 +60,65 @@
 </script>
 
 <template>
-    <div class="user-input-wrapper">
-        <p class="is-size-5 has-text-weight-bold">Enter Graph Parameters</p>
-        <div class="user-input">
-            <!-- Nodes Input Section -->
-            <article class="node-input message is-dark">
-                <div class="message-header">
-                    <p>Add Nodes</p>
+    <p class="is-size-5">Please enter graph parameters</p>
+    <div class="user-input">
+        <div class="node-input card">
+            <div class="card-content">
+                <div class="content">
+                    <p class="is-size-5">Enter Nodes</p>
+                    <label class="label">Node name:</label>
+                    <input class="input" v-model="nodeNameValue" type="text"><br><br>
+                    <button :disabled="!isValidNodeName" class="button" @click="handleNodesOperation(NodeMethods.addNode(nodeNameValue, distanceMap, visNodes))">Add Node</button> <button :disabled="!isValidNodeName" class="button" @click="handleNodesOperation(NodeMethods.deleteNode(nodeNameValue, distanceMap, visNodes))" >Delete node</button>
+                    <p class="has-text-warning">{{ nodeCardMessage }}</p>
+                </div>  
+            </div>
+        </div>  
+        <br>
+        <div class="edge-input card">
+            <div class="card-content">
+                <div class="content">
+                    <p class="is-size-5">Enter Edges</p>
+                    <label>From: </label>
+                    <input class="input" v-model="fromNodeValue" type="text">
+                    <label>To: </label>
+                    <input class="input" v-model="toNodeValue" type="text">
+                    <label>Distance</label>
+                    <input @change="showInvalidDistanceNumberError()" class="input" v-model="distanceNumber" type="number"><br><br>
+                    <button :disabled="!isValidFromNodeValue || !isValidToNodeValue || !isValidDistanceNumber" class="button" @click="handleEdgeMethods(EdgeMethods.addEdge(fromNodeValue, toNodeValue, distanceNumber, distanceMap, visEdges, selectedGraphType))">Add path</button> <button :disabled="!isValidFromNodeValue || !isValidToNodeValue" class="button" @click="handleEdgeMethods(EdgeMethods.deleteEdge(fromNodeValue, toNodeValue, distanceMap, visEdges, selectedGraphType))">Delete path</button>
                 </div>
-                <div class="message-body">
-                    <div class="field">
-                        <label class="label">Node Name:</label>
-                        <div class="control">
-                            <input class="input" v-model="nodeNameValue" type="text" placeholder="Enter node name">
-                        </div>
-                    </div>
-                    <div class="field is-grouped">
-                        <p class="control">
-                            <button :disabled="!isValidNodeName" class="button is-success" @click="handleNodesOperation(NodeMethods.addNode(nodeNameValue, distanceMap, visNodes))">Add Node</button>
-                        </p>
-                        <p class="control">
-                            <button :disabled="!isValidNodeName" class="button is-danger" @click="handleNodesOperation(NodeMethods.deleteNode(nodeNameValue, distanceMap, visNodes))">Delete Node</button>
-                        </p>
-                    </div>
-                    <div v-if="nodeCardMessage" class="notification is-warning is-light">
-                        <button class="delete"></button>
-                        {{ nodeCardMessage }}
-                    </div>
-                </div>
-            </article>
-
-            <!-- Edges Input Section -->
-            <article class="edge-input message is-dark">
-                <div class="message-header">
-                    <p>Add Edges</p>
-                </div>
-                <div class="message-body">
-                    <div class="field">
-                        <label class="label">From Node:</label>
-                        <div class="control">
-                            <input class="input" v-model="fromNodeValue" type="text" placeholder="Enter source node">
-                        </div>
-                    </div>
-                    <div class="field">
-                        <label class="label">To Node:</label>
-                        <div class="control">
-                            <input class="input" v-model="toNodeValue" type="text" placeholder="Enter target node">
-                        </div>
-                    </div>
-                    <div class="field">
-                        <label class="label">Distance:</label>
-                        <div class="control">
-                            <input @change="showInvalidDistanceNumberError()" class="input" v-model="distanceNumber" type="number" placeholder="Enter distance value">
-                        </div>
-                    </div>
-                    <div class="field is-grouped">
-                        <p class="control">
-                            <button :disabled="!isValidFromNodeValue || !isValidToNodeValue || !isValidDistanceNumber" class="button is-success" @click="handleEdgeMethods(EdgeMethods.addEdge(fromNodeValue, toNodeValue, distanceNumber, distanceMap, visEdges, selectedGraphType))">Add Edge</button>
-                        </p>
-                        <p class="control">
-                            <button :disabled="!isValidFromNodeValue || !isValidToNodeValue" class="button is-danger" @click="handleEdgeMethods(EdgeMethods.deleteEdge(fromNodeValue, toNodeValue, distanceMap, visEdges, selectedGraphType))">Delete Edge</button>
-                        </p>
-                    </div>
-                    <div v-if="edgeCardMessage" class="notification is-warning is-light">
-                        <button class="delete"></button>
-                        {{ edgeCardMessage }}
-                    </div>
-                </div>
-            </article>
-        </div>
-
-        <!-- Graph Canvas Section -->
-        <div v-if="distanceMap.size > 0" class="canvas-section">
-            <label class="checkbox">
-                <input type="checkbox" v-model="showCanvas">
-                <span class="ml-2">Show Graph Visualization</span>
-            </label>
-            <div v-if="showCanvas" class="visualization-wrapper">
-                <NetworkVisualizationCanvas :visNodes="visNodes" :visEdges="visEdges"/>
-                <div class="mt-3">
-                    <button class="button is-warning" @click="NetworkCanvasProcessor.ResetColors(visEdges)">Reset Edge Colors</button>
-                </div>
+                <p class="has-text-warning">{{ edgeCardMessage }}</p>
             </div>
         </div>
     </div>
+    <div v-if="distanceMap.size > 0">
+        <label>Show graph canvas</label> 
+        <input type="checkbox" v-model="showCanvas">
+        <div v-if="showCanvas">
+            <NetworkVisualizationCanvas :visNodes="visNodes" :visEdges="visEdges"/>
+            <button class="button is-danger" @click="NetworkCanvasProcessor.ResetColors(visEdges)">Reset edge colors</button>
+        </div>
+    </div>
+    
 </template>
 
 <style scoped>
-    .user-input-wrapper {
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-    }
-
-    .user-input {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1.5rem;
-        margin-top: 1rem;
-    }
-
-    .message {
-        border-radius: 6px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .message-header {
-        background-color: #363636;
-        border-bottom: 1px solid #555;
-    }
-
-    .message-header p {
-        color: #fff;
-        font-weight: 600;
-    }
-
-    .message-body {
-        padding: 1.5rem;
-    }
-
-    .field {
-        margin-bottom: 1rem;
-    }
-
-    .field:last-child {
-        margin-bottom: 0;
-    }
-
-    .is-grouped {
-        display: flex;
-        gap: 0.5rem;
-        flex-wrap: wrap;
-    }
-
-    .is-grouped .control {
-        flex: 1;
-        min-width: 150px;
-    }
-
-    .canvas-section {
-        margin-top: 1rem;
-        padding: 1.5rem;
-        background-color: #f5f5f5;
-        border-radius: 6px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .visualization-wrapper {
-        margin-top: 1rem;
-        background-color: #fff;
-        border-radius: 6px;
-        overflow: hidden;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .ml-2 {
-        margin-left: 0.5rem;
-    }
-
-    .mt-3 {
-        margin-top: 1rem;
-    }
-
-    /* Desktop layout - keep grid as specified */
-    @media (min-width: 1001px) {
-        .user-input {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-        }
-    }
-
-    /* Tablet layout */
-    @media (max-width: 1000px) and (min-width: 641px) {
+    @media (min-width: 1000px) {
         .user-input {
             display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
+            flex-direction: row;
+            gap: 20px;
+            margin-top: 20px;
         }
+      .card {
+          flex: 1;
+      }
     }
-
-    /* Mobile layout with padding */
     @media (max-width: 640px) {
-        .user-input-wrapper {
-            padding: 0 1rem;
-        }
-
-        .user-input {
+        .user-input{
             display: flex;
             flex-direction: column;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .message-body {
-            padding: 1rem;
-        }
-
-        .is-grouped {
-            flex-direction: column;
-        }
-
-        .is-grouped .control {
-            width: 100%;
-        }
-
-        .canvas-section {
-            padding: 1rem;
-            margin-left: 0;
-            margin-right: 0;
+            gap: 20px;
+            margin-top: 20px;
         }
     }
 </style>

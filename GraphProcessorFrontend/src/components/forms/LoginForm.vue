@@ -64,7 +64,7 @@
 
                         <!-- Authentication Status -->
                         <div v-if="authStore.isAuthenticated" class="notification is-success is-light">
-                            <p class="has-text-success">✓ Пользователь успешно аутентифицирован</p>
+                            <p class="has-text-success">✓ User authenticated successfully</p>
                         </div>
                     </div>
 
