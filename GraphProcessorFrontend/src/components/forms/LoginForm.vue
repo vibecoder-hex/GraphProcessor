@@ -49,6 +49,7 @@
             <p class="has-text-success">User has been authenticated</p>
         </div>
     </div>
+  
 
 </template>
 
