@@ -91,4 +91,11 @@
         flex-direction: column;
         gap: 20px;
     }
+
+    @media (max-width: 720px) {
+        .graph-structure {
+            padding: 0 1.5rem;
+            gap: 1rem;
+        }
+    }
 </style>
