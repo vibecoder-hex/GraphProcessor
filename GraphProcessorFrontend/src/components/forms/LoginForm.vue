@@ -3,7 +3,8 @@
     import { LoginRequests } from '@/services/httpServices/AuthenticationRequests.ts';
     import type { IAuthenticationResultObject, IResponseOperationResult } from '@/models/interfacesAndTypes.ts';
     import { useAuthenticationStore } from '@/stores/index.ts';
-    import { ref } from "vue";
+    import router from "@/router/index.ts";
+    import { ref, computed } from "vue";
 
     const API_URL = "api/User"
 
@@ -13,7 +14,14 @@
     const errorMessage = ref<string>("")
     const username = ref<string>("")
     const password = ref<string>("")
-
+  
+    const isPasswordValid = computed(() => {
+        return password.value && password.value.length > 6;
+    })
+    
+    const isLoginValid = computed(() => {
+        return username.value;
+    })
 
     async function handleLogin(): Promise<void> {
         const loginRequests = new LoginRequests(API_URL, username.value, password.value)
@@ -22,10 +30,8 @@
             const accessToken: IAuthenticationResultObject | null = loginResponse.responseData;
             if (accessToken != null) {
                 authStore.setToken(accessToken.tokenString)
-                authResultMessage.value = "Authentication successfull";
+                await router.push("/account");
                 errorMessage.value = "";
-                
-
             } else {
                 authResultMessage.value = '';
                 errorMessage.value = 'Authentication data is empty'
@@ -35,7 +41,6 @@
             errorMessage.value = loginResponse.operation.errorMessage;
         }
     }
-
 </script>
 
 <template>
@@ -44,17 +49,13 @@
         <LoginDataField v-model:username="username" v-model:password="password"/>
         <p class="has-text-danger">{{ errorMessage }}</p>
         <p class="has-text-success">{{ authResultMessage }}</p>
-        <button class="button is-success" @click="handleLogin()">Sign in</button>
-        <div v-if="authStore.isAuthenticated">
-            <p class="has-text-success">User has been authenticated</p>
-        </div>
+        <button :disabled="!isPasswordValid || !isLoginValid" class="button is-success" @click="handleLogin()">Sign in</button>
     </div>
 
 </template>
 
 <style scoped>
     .login-form {
-        
         display: flex;
         flex-direction: column;
         gap: 15px;
