@@ -43,6 +43,16 @@ export interface ILoginObject {
     password: string
 }
 
+export interface IRegisterObject {
+    username: string,
+    password: string,
+    repeatPassword: string,
+    firstname: string,
+    lastname: string,
+    phone: string,
+    email: string
+}
+
 export interface IJwtPayloadComponent {
     "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier": string,
     "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name": string,

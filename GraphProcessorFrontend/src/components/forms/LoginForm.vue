@@ -1,10 +1,10 @@
 <script setup lang="ts">
     import LoginDataField from './form_components/fields/LoginDataField.vue';
     import { LoginRequests } from '@/services/httpServices/AuthenticationRequests.ts';
-    import type { IAuthenticationResultObject, IResponseOperationResult } from '@/models/interfacesAndTypes.ts';
+    import type { IAuthenticationResultObject, IResponseOperationResult, ILoginObject } from '@/models/interfacesAndTypes.ts';
     import { useAuthenticationStore } from '@/stores/index.ts';
     import router from "@/router/index.ts";
-    import { ref, computed } from "vue";
+    import { ref, reactive, computed } from "vue";
 
     const API_URL = "api/User"
 
@@ -12,19 +12,19 @@
 
     const authResultMessage = ref<string>("")
     const errorMessage = ref<string>("")
-    const username = ref<string>("")
-    const password = ref<string>("")
+    
+    const loginObject = reactive<ILoginObject>({ username: "", password: "" })
   
     const isPasswordValid = computed(() => {
-        return password.value && password.value.length > 6;
+        return loginObject.password && loginObject.password.length > 6;
     })
     
     const isLoginValid = computed(() => {
-        return username.value;
+        return loginObject.username;
     })
 
     async function handleLogin(): Promise<void> {
-        const loginRequests = new LoginRequests(API_URL, username.value, password.value)
+        const loginRequests = new LoginRequests(API_URL, loginObject.username, loginObject.password);
         const loginResponse: IResponseOperationResult<IAuthenticationResultObject> = await loginRequests.login();
         if (loginResponse.operation.isValid) {
             const accessToken: IAuthenticationResultObject | null = loginResponse.responseData;
@@ -46,7 +46,7 @@
 <template>
     <div class="login-form">
         <h1 class="is-size-3">Login</h1>
-        <LoginDataField v-model:username="username" v-model:password="password"/>
+        <LoginDataField v-model:loginObject="loginObject"/>
         <p class="has-text-danger">{{ errorMessage }}</p>
         <p class="has-text-success">{{ authResultMessage }}</p>
         <button :disabled="!isPasswordValid || !isLoginValid" class="button is-success" @click="handleLogin()">Sign in</button>

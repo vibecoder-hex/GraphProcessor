@@ -2,7 +2,7 @@
     <nav class="navbar" role="navigation">
         <RouterLink class="navbar-item is-size-3" to="/">GraphProcessor</RouterLink>
         <RouterLink v-if="!authStore.isAuthenticated" class="navbar-item" to="/login">Sign in</RouterLink>
-        <RouterLink v-if="!authStore.isAuthenticated" class="navbar-item" to="#">Sign up</RouterLink>
+        <RouterLink v-if="!authStore.isAuthenticated" class="navbar-item" to="/register">Sign up</RouterLink>
         <RouterLink v-if="authStore.isAuthenticated" class="navbar-item" to="/account">Account</RouterLink>
         <RouterLink class="navbar-item" to="/about">About</RouterLink>
     </nav>

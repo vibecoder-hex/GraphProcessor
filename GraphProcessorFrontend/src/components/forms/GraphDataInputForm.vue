@@ -62,7 +62,7 @@
 </script>
 
 <template>
-    <form @submit.prevent>
+    <form class="graph_processor_form" @submit.prevent>
         <GraphTypeSelector v-model:selectedGraphType="selectedGraphType" v-model:isGraphTypeSelected="isGraphTypeSelected"></GraphTypeSelector>
         <UserInputVertexField v-if="isGraphTypeSelected"
                               v-model:selectedGraphType="selectedGraphType"
@@ -97,5 +97,9 @@
             padding: 0 1.5rem;
             gap: 1rem;
         }
+    }
+    .graph_processor_form {
+        width: 90%;
+        margin: 0 auto;
     }
 </style>

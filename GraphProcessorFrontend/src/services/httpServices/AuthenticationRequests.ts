@@ -1,4 +1,4 @@
-import type { IResponseOperationResult, ILoginObject, IAuthenticationResultObject, IJwtPayloadComponent } from "@/models/interfacesAndTypes";
+import type { IResponseOperationResult, ILoginObject, IRegisterObject, IAuthenticationResultObject, IJwtPayloadComponent } from "@/models/interfacesAndTypes";
 import axios from "axios";
 
 
@@ -115,6 +115,47 @@ export class LoginRequests implements ILoginRequests {
                     isValid: true,
                     errorMessage: ""
                 }, 
+                responseData: response.data
+            }
+        } catch(error) {
+            if (axios.isAxiosError(error)) {
+                return {
+                    operation : {
+                        isValid: false,
+                        errorMessage: `Error : ${error.response?.data.error}`
+                    },
+                    responseData: null
+                }
+            } else {
+                return {
+                    operation: {
+                        isValid: false,
+                        errorMessage: `Error: ${error}`
+                    },
+                    responseData: null
+                }
+            }
+        }
+    }
+}
+
+export class RegistrationRequests implements IRegistrationRequests {
+    private readonly _apiUrl: string
+    private readonly _userDataObject: IRegisterObject
+    
+    constructor(apiUrl: string, userDataObject: IRegisterObject) {
+        this._apiUrl = apiUrl
+        this._userDataObject = userDataObject
+    }
+    
+    public async register(): Promise<IResponseOperationResult<IAuthenticationResultObject>> {
+        try {
+            const response = await axios.post(`${this._apiUrl}/register`, this._userDataObject);
+            return {
+                operation : {
+                    isValid: true,
+                    errorMessage: ""
+                },
                 responseData: response.data
             }
         } catch(error) {

@@ -3,16 +3,15 @@
     import type { IResponseOperationResult, IUserProfileData } from '@/models/interfacesAndTypes';
 
     import { ProfileRequests } from '@/services/httpServices/AccountRequests';
+    import router  from '@/router';
     import { ref } from 'vue'
     import { useAuthenticationStore } from '@/stores';
-    import { useRouter } from "vue-router"
 
     const apiUrl = '/api/User'
 
     const errorMessage = ref<string>("")
     const accountDataObject = ref<IUserProfileData | null>(null)
-
-    const router = useRouter()
+    
     const authStore = useAuthenticationStore()
 
     async function loadProfile() {
@@ -43,9 +42,9 @@
 
     loadProfile();
 
-    function handleLogout() {
+    async function handleLogout() {
         authStore.deleteToken()
-        router.push('/')
+        await router.push('/')
     }
 
 </script>
