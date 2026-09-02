@@ -9,6 +9,12 @@ namespace GraphProcessorAPI.Repositories
         Task<User?> AddUserAsync(string username, string passwordHash, string firstName, string lastName, string email, string phone);
     }
 
+    public interface IRefreshTokenRepository
+    {
+        Task<RefreshToken?> AddRefreshTokenAsync(int userId, string refreshToken);
+        Task<RefreshToken?> GetRefreshTokenAsync(string tokenString);
+    }
+
     public class UserRepository : IUserRepository
     {
         private readonly GraphProcessorContext _dbContext;
@@ -48,6 +54,49 @@ namespace GraphProcessorAPI.Repositories
             _dbContext.Users.Add(newUser);
             await _dbContext.SaveChangesAsync();
             return newUser;
+        }
+    }
+
+    public class RefreshTokenRepository : IRefreshTokenRepository
+    {
+        private readonly GraphProcessorContext _dbContext;
+        
+        public  RefreshTokenRepository(GraphProcessorContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
+
+        public async Task<RefreshToken?> AddRefreshTokenAsync(int userId, string refreshToken)
+        {
+            var existingToken = await _dbContext.RefreshTokens
+                .FirstOrDefaultAsync(t => t.UserId == userId);
+            if (existingToken != null)
+            {
+                existingToken.Token = refreshToken;
+                existingToken.ExpiresAt = DateTime.UtcNow.AddDays(7);
+                existingToken.CreatedAt = DateTime.UtcNow;
+                await _dbContext.SaveChangesAsync();
+                return existingToken;
+            }
+            
+            var newToken = new RefreshToken
+            {
+                UserId = userId,
+                Token = refreshToken,
+                CreatedAt = DateTime.UtcNow,
+                ExpiresAt = DateTime.UtcNow.AddDays(7)
+            };
+            
+            _dbContext.Add(newToken);
+            await _dbContext.SaveChangesAsync();
+            return newToken;
+        }
+
+        public async Task<RefreshToken?> GetRefreshTokenAsync(string tokenString)
+        {
+            var token = await _dbContext.RefreshTokens
+                .FirstOrDefaultAsync(t => t.Token == tokenString);
+            return token;
         }
     }
 }

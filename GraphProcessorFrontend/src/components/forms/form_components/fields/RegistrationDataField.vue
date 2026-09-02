@@ -2,6 +2,8 @@
     import type { IRegisterObject } from "@/models/interfacesAndTypes.ts";
     
     const registerObject = defineModel<IRegisterObject>("registerObject", {required: true});
+    
+    
 </script>
 
 <template>

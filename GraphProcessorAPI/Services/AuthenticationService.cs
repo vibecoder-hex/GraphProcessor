@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace GraphProcessorAPI.Services
@@ -11,6 +12,7 @@ namespace GraphProcessorAPI.Services
     public interface ITokenService
     {
         string GetJsonWebTokenString(User user);
+        Task<RefreshToken> CreateRefreshToken(User user);
     }
 
     public interface ILoginService
@@ -26,10 +28,12 @@ namespace GraphProcessorAPI.Services
     public class TokenService : ITokenService
     {
         private readonly IConfiguration _configuration;
+        private readonly IRefreshTokenRepository _refreshTokenRepository;
 
-        public TokenService(IConfiguration configuration)
+        public TokenService(IConfiguration configuration,  IRefreshTokenRepository refreshTokenRepository)
         {
             _configuration = configuration;
+            _refreshTokenRepository = refreshTokenRepository;
         }
         public string GetJsonWebTokenString(User user)
         {
@@ -44,10 +48,19 @@ namespace GraphProcessorAPI.Services
                    issuer: _configuration["JwtParams:Issuer"],
                    audience: _configuration["JwtParams:Audience"],
                    claims: claims,
-                   expires: DateTime.UtcNow.AddMinutes(30),
+                   expires: DateTime.UtcNow.AddSeconds(30),
                    signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtParams:SecretKey"])), SecurityAlgorithms.HmacSha256)
                 );
             return new JwtSecurityTokenHandler().WriteToken(jwtToken);
+        }
+
+        public async Task<RefreshToken> CreateRefreshToken(User user)
+        {
+            Span<byte> byteBuffer = stackalloc byte[32];
+            RandomNumberGenerator.Fill(byteBuffer);
+            string tokenString = Convert.ToBase64String(byteBuffer);
+            var createdToken = await _refreshTokenRepository.AddRefreshTokenAsync(user.UserId, tokenString);
+            return createdToken;
         }
     }
 
@@ -75,8 +88,10 @@ namespace GraphProcessorAPI.Services
             if (verificationResult == PasswordVerificationResult.Failed)
                 return new LoginResult { IsValid = false, ErrorMessage = "Invalid password"};
 
-            var tokenString = _tokenService.GetJsonWebTokenString(user);
-            return new LoginResult { IsValid = true, TokenString = tokenString };
+            var accessTokenString = _tokenService.GetJsonWebTokenString(user);
+            var refreshToken = await _tokenService.CreateRefreshToken(user);
+            
+            return new LoginResult { IsValid = true, AccessTokenString = accessTokenString, RefreshToken =  refreshToken };
         }
     }
 

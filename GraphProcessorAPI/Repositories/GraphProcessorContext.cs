@@ -20,6 +20,8 @@ public partial class GraphProcessorContext : DbContext
     public virtual DbSet<ProcessingResult> ProcessingResults { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
+    
+    public virtual DbSet<RefreshToken>  RefreshTokens { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -185,8 +187,29 @@ public partial class GraphProcessorContext : DbContext
                 .HasColumnType("accountrole");
         });
 
-        OnModelCreatingPartial(modelBuilder);
-    }
+        modelBuilder.Entity<RefreshToken>(entity =>
+        {
+            entity.HasKey(e => e.Id)
+                .HasName("refresh_token_id_pk");
+            entity.ToTable("refresh_token");
+            entity.Property(e => e.Id)
+                .HasColumnName("token_id");
+            entity.Property(e => e.UserId)
+                .HasColumnName("user_id");
+            entity.Property(e => e.Token)
+                .HasColumnName("token");
+            entity.Property(e => e.ExpiresAt)
+                .HasColumnName("expires_at");
+            entity.Property(e => e.CreatedAt)
+                .HasColumnName("created_at");
 
-    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+            entity.HasIndex(e => e.UserId, "refresh_token_fk_index");
+            entity.HasIndex(e => e.Token, "refresh_token_unq").IsUnique();
+            
+            entity.HasOne(e => e.User)
+                .WithOne(d => d.RefreshToken)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("refresh_token__fk");
+        });
+    }
 }

@@ -8,7 +8,8 @@
 
     public class LoginResult : ServiceResult
     {
-        public string? TokenString { get; set; }
+        public string? AccessTokenString { get; set; }
+        public RefreshToken? RefreshToken { get; set; }
     }
 
     public class RegistrationResult: ServiceResult

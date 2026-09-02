@@ -6,6 +6,5 @@
     <File Path=".env" />
   </Folder>
   <Project Path="GraphProcessorAPI/GraphProcessorAPI.csproj" />
-  <Project Path="GraphProcessorClient/GraphProcessorClient.csproj" />
   <Project Path="GraphProcessorTest/GraphProcessorTest.csproj" />
 </Solution>

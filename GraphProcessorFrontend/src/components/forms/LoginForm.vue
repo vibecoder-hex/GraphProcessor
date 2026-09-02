@@ -20,7 +20,7 @@
     })
     
     const isLoginValid = computed(() => {
-        return loginObject.username;
+        return loginObject.username.trim().length > 0;
     })
 
     async function handleLogin(): Promise<void> {

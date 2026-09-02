@@ -3,7 +3,8 @@
     import type {
       IAuthenticationResultObject,
       IRegisterObject,
-      IResponseOperationResult
+      IResponseOperationResult,
+      IOperationResult  
     } from "@/models/interfacesAndTypes.ts";
     import { RegistrationRequests } from "@/services/httpServices/AuthenticationRequests.ts";
     import { useAuthenticationStore } from "@/stores";
@@ -22,10 +23,56 @@
         lastname: "",
         phone: "",
         email: "",
-    })
+    }, )
     const errorMessage = ref<string>("")
     
-    async function handleRegister() {
+    function passwordValidator(password: string, repeatPassword: string): IOperationResult {
+        if (password.trim().length < 6) {
+            return {
+                isValid: false,
+                errorMessage: "Passwords must be 6 characters long",
+            }
+        }
+        if (password !== repeatPassword) {
+            return {
+                isValid: false,
+                errorMessage: "Password does not match",
+            }
+        }
+        return {
+            isValid: true,
+            errorMessage: "",
+        }
+    }
+    
+    function fieldValidator(fieldObject: IRegisterObject): IOperationResult {
+        for (const value in Object.values(fieldObject)) {
+            if (!value.trim()) {
+                return {
+                    isValid: false,
+                    errorMessage: `Field ${value} is empty`
+                }
+            }
+        }
+        return {
+            isValid: true,
+            errorMessage: "",
+        }
+    }
+    
+    async function handleRegister(): Promise<void> {
+        const fieldValidationResult: IOperationResult = fieldValidator(registerObject)
+        if (!fieldValidationResult.isValid) {
+            errorMessage.value = fieldValidationResult.errorMessage
+            return
+        }
+        
+        const passwordValidationResult: IOperationResult = passwordValidator(registerObject.password, registerObject.repeatPassword)
+        if (!passwordValidationResult.isValid) {
+            errorMessage.value = passwordValidationResult.errorMessage
+            return
+        }
+        
         const registrationRequests = new RegistrationRequests(API_URL, registerObject);
         const response: IResponseOperationResult<IAuthenticationResultObject> = await registrationRequests.register();
         if (response.operation.isValid) {
@@ -46,7 +93,7 @@
 <template>
     <div class="registration-form">
         <h1 class="is-size-3">Registration</h1>
-        <RegistrationDataField v-model:registerObject="registerObject" />
+        <RegistrationDataField v-model:registerObject="registerObject"/>
         <button class="button is-success" @click="handleRegister">Sign up</button>
         <p class="has-text-danger">{{ errorMessage }}</p>
     </div>

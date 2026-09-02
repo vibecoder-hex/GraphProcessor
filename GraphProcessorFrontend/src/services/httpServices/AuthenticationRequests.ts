@@ -81,9 +81,8 @@ export class TokenProcessor implements ITokenProcessor  {
         const expire = this.getTokenExpire()
         if (!expire)
             return false
-        if (expire.getTime() < Date.now())
-            return false
-        return true
+        return expire.getTime() >= Date.now();
+        
     }
 }
 
