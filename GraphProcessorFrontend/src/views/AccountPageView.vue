@@ -3,6 +3,7 @@
     import type { IResponseOperationResult, IUserProfileData } from '@/models/interfacesAndTypes';
 
     import { ProfileRequests } from '@/services/httpServices/AccountRequests';
+    import { LoginRequests } from "@/services/httpServices/AuthenticationRequests.ts";
     import router  from '@/router';
     import { ref } from 'vue'
     import { useAuthenticationStore } from '@/stores';
@@ -39,12 +40,18 @@
         }
     }
 
-
     loadProfile();
 
-    async function handleLogout() {
-        authStore.deleteToken()
-        await router.push('/')
+    function handleLogout() {
+        const loginRequests = new LoginRequests(apiUrl);
+        const token: string | null = authStore.token;
+        if (token !== null) {
+            Promise.all([
+                loginRequests.logout(token),
+                router.push('/')
+            ])
+            authStore.deleteToken()
+        }
     }
 
 </script>

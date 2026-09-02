@@ -13,6 +13,7 @@ namespace GraphProcessorAPI.Repositories
     {
         Task<RefreshToken?> AddRefreshTokenAsync(int userId, string refreshToken);
         Task<RefreshToken?> GetRefreshTokenAsync(string tokenString);
+        Task RevokeRefreshTokenAsync(string tokenString);
     }
 
     public class UserRepository : IUserRepository
@@ -95,8 +96,20 @@ namespace GraphProcessorAPI.Repositories
         public async Task<RefreshToken?> GetRefreshTokenAsync(string tokenString)
         {
             var token = await _dbContext.RefreshTokens
+                .Include(u => u.User)
                 .FirstOrDefaultAsync(t => t.Token == tokenString);
             return token;
+        }
+
+        public async Task RevokeRefreshTokenAsync(string tokenString)
+        {
+            var token = await _dbContext.RefreshTokens
+                .FirstOrDefaultAsync(t => t.Token == tokenString);
+            if (token != null)
+            {
+                _dbContext.RefreshTokens.Remove(token);
+                await _dbContext.SaveChangesAsync();
+            }
         }
     }
 }

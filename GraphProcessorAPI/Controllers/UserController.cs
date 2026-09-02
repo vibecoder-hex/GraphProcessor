@@ -90,15 +90,15 @@ namespace GraphProcessorAPI.Controllers
         [HttpGet("refresh")]
         public async Task<ActionResult> Refresh()
         {
-            var cookieRefreshToken = Request.Cookies["refreshToken"];
+            string? cookieRefreshToken = Request.Cookies["refreshToken"];
             if (string.IsNullOrEmpty(cookieRefreshToken))
-                
                 return Unauthorized(new { Error = "Refresh token is empty" });
-            var accountRefreshToken = await _refreshTokenRepository
-                .GetRefreshTokenAsync(cookieRefreshToken);
+            
+            var accountRefreshToken = await _refreshTokenRepository.GetRefreshTokenAsync(cookieRefreshToken);
             if (accountRefreshToken == null || DateTime.UtcNow > accountRefreshToken.ExpiresAt)
                 return Unauthorized(new { Error = "Invalid refresh or expired token" });
             
+            _logger.LogInformation($"User: {accountRefreshToken.User}");
 
             var newRefreshToken = await _tokenService.CreateRefreshToken(accountRefreshToken.User);
             
@@ -113,6 +113,23 @@ namespace GraphProcessorAPI.Controllers
             
             string newAccessToken = _tokenService.GetJsonWebTokenString(accountRefreshToken.User);
             return Ok(new { Token = newAccessToken });
+        }
+        
+        [Authorize]
+        [HttpGet("logout")]
+        public async Task<ActionResult> Logout()
+        {
+            string? cookieRefreshToken = Request.Cookies["refreshToken"];
+            if (string.IsNullOrEmpty(cookieRefreshToken))
+                return BadRequest(new { Error = "Token does not found in cookie" });
+
+            var logoutResult = await _loginService.Logout(cookieRefreshToken);
+            if (logoutResult.IsValid)
+            {
+                Response.Cookies.Delete("refreshToken");
+                return Ok("Logout successful");
+            }
+            return Unauthorized(new { Error = logoutResult.ErrorMessage });
         }
     }
 }

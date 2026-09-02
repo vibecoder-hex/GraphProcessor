@@ -4,6 +4,7 @@ import axios from "axios";
 
 export interface ILoginRequests {
     login() : Promise<IResponseOperationResult<IAuthenticationResultObject>>
+    logout(accessToken: string): Promise<void>
 }
 
 export interface IRegistrationRequests {
@@ -91,7 +92,7 @@ export class LoginRequests implements ILoginRequests {
     private readonly _username: string
     private readonly _password: string
 
-    constructor(apiUrl: string, username: string, password: string) {
+    constructor(apiUrl: string, username: string = "", password: string = "") {
         this._apiUrl = apiUrl
         this._username = username
         this._password = password
@@ -135,6 +136,13 @@ export class LoginRequests implements ILoginRequests {
                 }
             }
         }
+    }
+    public async logout(accessToken: string): Promise<void> {
+        await axios.get(`${this._apiUrl}/logout`, {
+            headers: {
+                Authorization: `Bearer ${ accessToken }`
+            }
+        });
     }
 }
 

@@ -18,6 +18,7 @@ namespace GraphProcessorAPI.Services
     public interface ILoginService
     {
         Task<LoginResult> Login(string username, string password);
+        Task<LoginResult> Logout(string refreshTokenString);
     }
 
     public interface IRegistrationService
@@ -68,13 +69,15 @@ namespace GraphProcessorAPI.Services
     {
         private readonly IPasswordHasher<User> _passwordHasher;
         private readonly IUserRepository _userService;
+        private readonly IRefreshTokenRepository _refreshTokenRepository;
         private readonly ITokenService _tokenService;
 
-        public LoginService(IPasswordHasher<User> passwordHasher, IUserRepository userService, ITokenService tokenService)
+        public LoginService(IPasswordHasher<User> passwordHasher, IUserRepository userService, ITokenService tokenService, IRefreshTokenRepository refreshTokenRepository)
         {
             _passwordHasher = passwordHasher;
             _userService = userService;
             _tokenService = tokenService;
+            _refreshTokenRepository = refreshTokenRepository;
         }
 
         public async Task<LoginResult> Login(string username, string password)
@@ -92,6 +95,16 @@ namespace GraphProcessorAPI.Services
             var refreshToken = await _tokenService.CreateRefreshToken(user);
             
             return new LoginResult { IsValid = true, AccessTokenString = accessTokenString, RefreshToken =  refreshToken };
+        }
+
+        public async Task<LoginResult> Logout(string refreshTokenString)
+        {
+            var refreshToken = await _refreshTokenRepository.GetRefreshTokenAsync(refreshTokenString);
+            if (refreshToken == null)
+                return new LoginResult { IsValid =  false, ErrorMessage = "Refresh token not found" };
+            
+            await _refreshTokenRepository.RevokeRefreshTokenAsync(refreshToken.Token);
+            return new LoginResult { IsValid = true };
         }
     }
 

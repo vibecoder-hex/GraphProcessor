@@ -16,10 +16,5 @@
     {
         public string? TokenString { get; set; }
     }
-
-    public class UserResult : ServiceResult
-    {
-        public User? SelectedUser { get; set; }
-    }
 }
  
