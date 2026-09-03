@@ -1,25 +1,24 @@
-import axios from "axios";
+import axios, {type AxiosInstance} from "axios";
 import type { IOperationResult, IResponseOperationResult, IUserProfileData } from "@/models/interfacesAndTypes";
+import { ApiClientConfigurator } from "@/services/httpServices/ApiClientConfigurator.ts";
 
 export interface IProfileRequests {
     getAccountData(): Promise<IResponseOperationResult<IUserProfileData>>
 }
 
 export class ProfileRequests implements IProfileRequests {
+    private readonly _profileClient: AxiosInstance
     private readonly _apiUrl: string
-    private readonly _accessToken: string
 
-    constructor(apiUrl: string, accessToken: string) {
-        this._apiUrl = apiUrl,
-        this._accessToken = accessToken
+    constructor(apiUrl: string) {
+        this._apiUrl = apiUrl;
+        const apiConfigurator = new ApiClientConfigurator(this._apiUrl);
+        this._profileClient = apiConfigurator.getInstance()
     }
 
     public async getAccountData(): Promise<IResponseOperationResult<IUserProfileData>> {
         try {
-            const request = await axios.get(`${this._apiUrl}/profile`, { 
-                headers: {
-                    "Authorization": `Bearer ${this._accessToken}`
-                } });
+            const request = await this._profileClient.get(`profile`);
             return {
                 operation: {
                     isValid: true,

@@ -59,6 +59,7 @@ namespace GraphProcessorAPI.Controllers
                 _logger.LogError($"Registration filed");
                 return Unauthorized(new { Error = registerResult.ErrorMessage  });
             }
+            
             _logger.LogInformation($" {userData.Username} registered and recieved token: { registerResult.TokenString } ");
             return Ok(new { TokenString = registerResult.TokenString  });
         }

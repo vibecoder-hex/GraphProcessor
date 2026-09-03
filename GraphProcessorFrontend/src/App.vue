@@ -14,7 +14,7 @@
 <script setup lang="ts">
     import { useAuthenticationStore } from './stores';
     import { onMounted } from 'vue';
-    import { TokenProcessor } from './services/httpServices/AuthenticationRequests';
+    import { TokenProcessor} from "@/services/httpServices/ApiClientConfigurator.ts";
 
     const authStore = useAuthenticationStore()
     

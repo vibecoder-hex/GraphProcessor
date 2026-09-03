@@ -11,6 +11,7 @@ namespace GraphProcessorTest.UserServices
         private readonly Mock<IUserRepository> _mockUserRepository;
         private readonly Mock<IPasswordHasher<User>> _mockPasswordHasher = new Mock<IPasswordHasher<User>>();
         private readonly Mock<ITokenService> _mockTokenService = new Mock<ITokenService>();
+        private readonly Mock<IRefreshTokenRepository> _mockRefreshTokenRepository = new Mock<IRefreshTokenRepository>();
 
         private readonly ILoginService _loginService;
         private readonly IRegistrationService _registrationService;
@@ -18,7 +19,7 @@ namespace GraphProcessorTest.UserServices
         public AuthenticationServiceTests()
         {
             _mockUserRepository = new Mock<IUserRepository>();
-            _loginService = new LoginService(_mockPasswordHasher.Object, _mockUserRepository.Object, _mockTokenService.Object);
+            _loginService = new LoginService(_mockPasswordHasher.Object, _mockUserRepository.Object, _mockTokenService.Object, _mockRefreshTokenRepository.Object);
             _registrationService = new RegistrationService(_mockPasswordHasher.Object, _mockUserRepository.Object, _mockTokenService.Object);
         }
 

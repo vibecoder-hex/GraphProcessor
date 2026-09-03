@@ -16,13 +16,7 @@
     const authStore = useAuthenticationStore()
 
     async function loadProfile() {
-        if (!authStore.token) {
-            accountDataObject.value = null;
-            errorMessage.value = "Access token not found";
-            return;
-        }
-        
-        const profileRequest = new ProfileRequests(apiUrl, authStore.token);
+        const profileRequest = new ProfileRequests(apiUrl);
         const response: IResponseOperationResult<IUserProfileData> = await profileRequest.getAccountData();
         
         if (response.operation.isValid) {
@@ -47,7 +41,7 @@
         const token: string | null = authStore.token;
         if (token !== null) {
             Promise.all([
-                loginRequests.logout(token),
+                loginRequests.logout(),
                 router.push('/')
             ])
             authStore.deleteToken()
