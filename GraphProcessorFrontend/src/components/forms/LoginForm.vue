@@ -32,9 +32,6 @@
                 authStore.setToken(accessToken.tokenString)
                 await router.push("/account");
                 errorMessage.value = "";
-            } else {
-                authResultMessage.value = '';
-                errorMessage.value = 'Authentication data is empty'
             }
         } else {
             authResultMessage.value = "";

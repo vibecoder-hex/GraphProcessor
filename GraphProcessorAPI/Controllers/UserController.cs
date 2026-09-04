@@ -35,7 +35,14 @@ namespace GraphProcessorAPI.Controllers
             if (!loginResult.IsValid)
             {
                 _logger.LogError($"Login failed for user {userData.Username}");
-                return Unauthorized(new { Error = loginResult.ErrorMessage});
+                return BadRequest(new
+                {
+                    title = "Invalid credentials",
+                    errors = new
+                    {
+                        Details =  new[] { loginResult.ErrorMessage }
+                    }
+                });
             }
             _logger.LogInformation($"refresh token {loginResult.RefreshToken.Token}");
 
@@ -57,7 +64,14 @@ namespace GraphProcessorAPI.Controllers
             if (!registerResult.IsValid)
             {
                 _logger.LogError($"Registration filed");
-                return Unauthorized(new { Error = registerResult.ErrorMessage  });
+                return BadRequest(new
+                {
+                    title = "Invalid credentials",
+                    errors = new
+                    {
+                        Details =  new[] { registerResult.ErrorMessage }
+                    }
+                });
             }
             
             _logger.LogInformation($" {userData.Username} registered and recieved token: { registerResult.TokenString } ");
