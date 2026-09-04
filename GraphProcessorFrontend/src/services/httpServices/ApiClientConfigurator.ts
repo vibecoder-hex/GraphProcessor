@@ -1,6 +1,7 @@
-import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from 'axios'
+import axios, { type AxiosInstance, type InternalAxiosRequestConfig, AxiosError } from 'axios'
 import { useAuthenticationStore } from "@/stores";
-import type { IJwtPayloadComponent } from "@/models/interfacesAndTypes.ts";
+import type { IJwtPayloadComponent, IBadRequestBody } from "@/models/interfacesAndTypes.ts";
+
 
 export interface IApiClientConfigurator {
     getInstance(): AxiosInstance
@@ -79,6 +80,40 @@ export class TokenProcessor implements ITokenProcessor  {
             return false
         return expire.getTime() >= Date.now();
 
+    }
+}
+
+export class ErrorHandler {
+    private static handleBadRequest(error: AxiosError<IBadRequestBody>): string {
+        const errorTitle = error.response?.data.title
+        const errorObj = error.response?.data.errors
+        if (errorTitle && errorObj) {
+            const errorMessages: string = Object.entries(errorObj)
+                .map(([key, value]) => `${key}: ${value.join(', ')}`)
+                .join('; ')
+            console.error(errorMessages)
+            return `${errorTitle}: ${errorMessages}`
+        }
+        return "Validation error"
+    }
+    
+    public static handleError(error: AxiosError | unknown): string {
+        if (axios.isAxiosError(error)) {
+            const errorStatus = error.response?.status;
+            if (axios.isAxiosError<IBadRequestBody>(error) && errorStatus === 400) {
+                return this.handleBadRequest(error)
+            }
+            if (errorStatus === 403) {
+                return "Access denied error"
+            }
+            if (errorStatus === 500) {
+                return "Internal Server Error"
+            }
+            if (errorStatus === 404) {
+                return "Not Found error"
+            }
+        }
+        return `${error}`;
     }
 }
 

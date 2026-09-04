@@ -1,6 +1,6 @@
 import axios, {type AxiosInstance} from 'axios'
 import type { IGraphParametersObject, IResponseOperationResult, IDistanceProcessingRootObject, Algorithm } from "@/models/interfacesAndTypes.ts";
-import {ApiClientConfigurator} from "@/services/httpServices/ApiClientConfigurator.ts";
+import {ApiClientConfigurator, ErrorHandler} from "@/services/httpServices/ApiClientConfigurator.ts";
 
 export interface IGraphAlgorithmsRequests {
     getPathFromRequest(): Promise<IResponseOperationResult<IDistanceProcessingRootObject>>
@@ -46,23 +46,12 @@ export class GraphAlgorithmsRequests implements IGraphAlgorithmsRequests {
                 responseData: response.data
             }
         } catch(error) {
-            if (axios.isAxiosError(error)) {
-                return {
-                    operation: {
-                        isValid: false,
-                        errorMessage: `Error: ${error} ${error.response?.data.error}`,
-                    },
-                    responseData: null
-                }
-            }
-            else {
-                return {
-                    operation: {
-                        isValid: false,
-                        errorMessage: `Error: ${error}`,
-                    },
-                    responseData: null
-                }
+            return {
+                operation : {
+                    isValid: false,
+                    errorMessage: ErrorHandler.handleError(error)
+                },
+                responseData: null
             }
         }
     }

@@ -1,6 +1,6 @@
 import type { IResponseOperationResult, ILoginObject, IRegisterObject, IAuthenticationResultObject, IJwtPayloadComponent } from "@/models/interfacesAndTypes";
 import axios, {type AxiosInstance} from "axios";
-import { ApiClientConfigurator } from "@/services/httpServices/ApiClientConfigurator.ts";
+import { ApiClientConfigurator, ErrorHandler } from "@/services/httpServices/ApiClientConfigurator.ts";
 
 export interface ILoginRequests {
     login() : Promise<IResponseOperationResult<IAuthenticationResultObject>>
@@ -45,27 +45,21 @@ export class LoginRequests implements ILoginRequests {
                 responseData: response.data
             }
         } catch(error) {
-            if (axios.isAxiosError(error)) {
-                return {
-                    operation : {
-                        isValid: false,
-                        errorMessage: `Error : ${error.response?.data.error}`
-                    },
-                    responseData: null
-                }
-            } else {
-                return {
-                    operation: {
-                        isValid: false,
-                        errorMessage: `Error: ${error}`
-                    },
-                    responseData: null
-                }
+            return {
+                operation : {
+                    isValid: true,
+                    errorMessage: ErrorHandler.handleError(error)
+                },
+                responseData: null
             }
         }
     }
     public async logout(): Promise<void> {
-        await this._loginClient.get(`${this._apiUrl}/logout`);
+        try {
+            await this._loginClient.get(`logout`);
+        } catch (error) {
+            console.error(ErrorHandler.handleError(error));
+        }
     }
 }
 
@@ -92,22 +86,12 @@ export class RegistrationRequests implements IRegistrationRequests {
                 responseData: response.data
             }
         } catch(error) {
-            if (axios.isAxiosError(error)) {
-                return {
-                    operation : {
-                        isValid: false,
-                        errorMessage: `Error : ${error.response?.data.error}`
-                    },
-                    responseData: null
-                }
-            } else {
-                return {
-                    operation: {
-                        isValid: false,
-                        errorMessage: `Error: ${error}`
-                    },
-                    responseData: null
-                }
+            return {
+                operation : {
+                    isValid: false,
+                    errorMessage: ErrorHandler.handleError(error)
+                },
+                responseData: null
             }
         }
     }

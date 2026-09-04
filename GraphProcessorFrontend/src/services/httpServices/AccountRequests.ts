@@ -1,6 +1,6 @@
 import axios, {type AxiosInstance} from "axios";
 import type { IOperationResult, IResponseOperationResult, IUserProfileData } from "@/models/interfacesAndTypes";
-import { ApiClientConfigurator } from "@/services/httpServices/ApiClientConfigurator.ts";
+import {ApiClientConfigurator, ErrorHandler} from "@/services/httpServices/ApiClientConfigurator.ts";
 
 export interface IProfileRequests {
     getAccountData(): Promise<IResponseOperationResult<IUserProfileData>>
@@ -26,23 +26,13 @@ export class ProfileRequests implements IProfileRequests {
                 },
                 responseData: request.data
             }
-        } catch (error) {
-            if (axios.isAxiosError(error)) {
-                return {
-                    operation : {
-                        isValid: false,
-                        errorMessage: `Error: ${error.response?.data.error}`
-                    },
-                    responseData: null
-                }
-            } else {
-                return {
-                    operation: {
-                        isValid: false,
-                        errorMessage: `Error: ${error}`
-                    },
-                    responseData: null
-                }
+        } catch(error) {
+            return {
+                operation : {
+                    isValid: false,
+                    errorMessage: ErrorHandler.handleError(error)
+                },
+                responseData: null
             }
         }
     }

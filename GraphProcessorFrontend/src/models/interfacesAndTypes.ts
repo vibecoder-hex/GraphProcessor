@@ -69,3 +69,12 @@ export interface IUserProfileData {
     phoneNumber: string,
     email: string
 }
+
+export interface IBadRequestBody {
+    type: string
+    title: string
+    status: number
+    errors: {
+        [errorType: string]: string[]
+    }
+}

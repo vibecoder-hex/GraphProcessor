@@ -81,8 +81,6 @@
                 authStore.setToken(accessToken.tokenString)
                 await router.push("/account")
                 errorMessage.value = ""
-            } else {
-                errorMessage.value = "Access token is empty"
             }
         } else {
             errorMessage.value = response.operation.errorMessage
