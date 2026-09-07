@@ -13,16 +13,14 @@ export interface IRegistrationRequests {
 
 export class LoginRequests implements ILoginRequests {
     private readonly _loginClient: AxiosInstance
-    private readonly _apiUrl: string
     private readonly _username: string
     private readonly _password: string
 
-    constructor(apiUrl: string, username: string = "", password: string = "") {
-        this._apiUrl = apiUrl
+    constructor(username: string = "", password: string = "") {
         this._username = username
         this._password = password
-        const apiConfigurator = new ApiClientConfigurator(this._apiUrl)
-        this._loginClient = apiConfigurator.getInstance()
+        const apiInstance = ApiClientConfigurator.getInstance()
+        this._loginClient = apiInstance.getClient()
     }
 
     private getLoginObject(): ILoginObject {
@@ -36,7 +34,7 @@ export class LoginRequests implements ILoginRequests {
     public async login(): Promise<IResponseOperationResult<IAuthenticationResultObject>> {
         const loginObject: ILoginObject = this.getLoginObject();
         try {
-            const response = await this._loginClient.post(`login`, loginObject);
+            const response = await this._loginClient.post(`api/User/login`, loginObject);
             return {
                 operation : {
                     isValid: true,
@@ -65,19 +63,17 @@ export class LoginRequests implements ILoginRequests {
 
 export class RegistrationRequests implements IRegistrationRequests {
     private readonly _registerClient: AxiosInstance
-    private readonly _apiUrl: string
     private readonly _userDataObject: IRegisterObject
     
     constructor(apiUrl: string, userDataObject: IRegisterObject) {
-        this._apiUrl = apiUrl
         this._userDataObject = userDataObject
-        const apiConfigurator = new ApiClientConfigurator(this._apiUrl)
-        this._registerClient = apiConfigurator.getInstance()
+        const apiInstance = ApiClientConfigurator.getInstance()
+        this._registerClient = apiInstance.getClient()
     }
     
     public async register(): Promise<IResponseOperationResult<IAuthenticationResultObject>> {
         try {
-            const response = await this._registerClient.post(`register`, this._userDataObject);
+            const response = await this._registerClient.post(`api/User/register`, this._userDataObject);
             return {
                 operation : {
                     isValid: true,

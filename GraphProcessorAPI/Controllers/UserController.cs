@@ -127,7 +127,7 @@ namespace GraphProcessorAPI.Controllers
             Response.Cookies.Append("refreshToken", newRefreshToken.Token, refreshCookie);
             
             string newAccessToken = _tokenService.GetJsonWebTokenString(accountRefreshToken.User);
-            return Ok(new { Token = newAccessToken });
+            return Ok(new { TokenString = newAccessToken });
         }
         
         [Authorize]

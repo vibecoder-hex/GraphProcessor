@@ -6,8 +6,6 @@
     import router from "@/router/index.ts";
     import { ref, reactive, computed } from "vue";
 
-    const API_URL = "api/User"
-
     const authStore = useAuthenticationStore();
 
     const authResultMessage = ref<string>("")
@@ -24,7 +22,7 @@
     })
 
     async function handleLogin(): Promise<void> {
-        const loginRequests = new LoginRequests(API_URL, loginObject.username, loginObject.password);
+        const loginRequests = new LoginRequests(loginObject.username, loginObject.password);
         const loginResponse: IResponseOperationResult<IAuthenticationResultObject> = await loginRequests.login();
         if (loginResponse.operation.isValid) {
             const accessToken: IAuthenticationResultObject | null = loginResponse.responseData;

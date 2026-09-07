@@ -15,8 +15,6 @@
     import  { type IGraphAlgorithmsRequests, GraphAlgorithmsRequests } from "@/services/httpServices/GraphAlgorithmsRequests.ts";
     import {NetworkCanvasProcessor} from "@/services/graphServices/networkCanvasService.ts";
     import { DataSet, type Edge, type Node } from "vis-network/standalone"
-
-    const APIURL: string = "/api/GraphAlgorithms"
     
     const selectedAlgorithm = ref<Algorithm>("dijkstra")
 
@@ -42,7 +40,7 @@
     }
       
     async function handleRequestedPath(): Promise<void> {
-        const graphAlgorithmsRequests: IGraphAlgorithmsRequests = new GraphAlgorithmsRequests(APIURL, getObjectFromMap(), selectedAlgorithm.value, startVertex.value, targetVertex.value)
+        const graphAlgorithmsRequests: IGraphAlgorithmsRequests = new GraphAlgorithmsRequests(getObjectFromMap(), selectedAlgorithm.value, startVertex.value, targetVertex.value)
         const pathRequest: IResponseOperationResult<IDistanceProcessingRootObject> = await graphAlgorithmsRequests.getPathFromRequest();
         if (pathRequest.operation.isValid) {
             const shortestPath: IDistanceProcessingRootObject | null  = pathRequest.responseData

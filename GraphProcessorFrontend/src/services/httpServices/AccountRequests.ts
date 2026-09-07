@@ -8,17 +8,15 @@ export interface IProfileRequests {
 
 export class ProfileRequests implements IProfileRequests {
     private readonly _profileClient: AxiosInstance
-    private readonly _apiUrl: string
 
-    constructor(apiUrl: string) {
-        this._apiUrl = apiUrl;
-        const apiConfigurator = new ApiClientConfigurator(this._apiUrl);
-        this._profileClient = apiConfigurator.getInstance()
+    constructor() {
+        const apiInstance = ApiClientConfigurator.getInstance()
+        this._profileClient = apiInstance.getClient()
     }
 
     public async getAccountData(): Promise<IResponseOperationResult<IUserProfileData>> {
-        try {
-            const request = await this._profileClient.get(`profile`);
+       try {
+            const request = await this._profileClient.get(`api/User/profile`);
             return {
                 operation: {
                     isValid: true,
@@ -26,9 +24,9 @@ export class ProfileRequests implements IProfileRequests {
                 },
                 responseData: request.data
             }
-        } catch(error) {
+       } catch(error) {
             return {
-                operation : {
+               operation : {
                     isValid: false,
                     errorMessage: ErrorHandler.handleError(error)
                 },

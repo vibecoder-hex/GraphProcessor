@@ -1,10 +1,11 @@
 import axios, { type AxiosInstance, type InternalAxiosRequestConfig, AxiosError } from 'axios'
 import { useAuthenticationStore } from "@/stores";
-import type { IJwtPayloadComponent, IBadRequestBody } from "@/models/interfacesAndTypes.ts";
+import type { IJwtPayloadComponent, IBadRequestBody, IAuthenticationResultObject } from "@/models/interfacesAndTypes.ts";
 
 
 export interface IApiClientConfigurator {
-    getInstance(): AxiosInstance
+    getClient(): AxiosInstance
+    
 }
 
 export interface ITokenProcessor {
@@ -49,7 +50,6 @@ export class TokenProcessor implements ITokenProcessor  {
             } catch (error) {
                 console.error("failed to parse/decode token", error)
             }
-
         }
         return null
     }
@@ -118,32 +118,99 @@ export class ErrorHandler {
 }
 
 export class ApiClientConfigurator implements IApiClientConfigurator {
-    private readonly _apiUrl: string;
     private readonly _instance: AxiosInstance;
-    private readonly _accessToken: string | null;
+    private static _clientInstance: ApiClientConfigurator | null = null
     
-    constructor (apiUrl: string) {
-        this._apiUrl = apiUrl;
+    constructor () {
         this._instance = axios.create({
-            baseURL: apiUrl,
-            withCredentials: true,
-            
+            withCredentials: true
         });
-        const authStore = useAuthenticationStore();
-        this._accessToken = authStore.token;
-        this.setupInterceptors()
+        this.setupAccessToken();
+        this.tokenRefresher();
     }
     
-    public getInstance(): AxiosInstance {
+    public static getInstance(): ApiClientConfigurator {
+        if (!ApiClientConfigurator._clientInstance) {
+            ApiClientConfigurator._clientInstance = new ApiClientConfigurator()
+        }
+        return ApiClientConfigurator._clientInstance;
+    }
+    public getClient(): AxiosInstance {
         return this._instance;
     }
     
-    private setupInterceptors() {
-        this._instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-            if (this._accessToken) {
-                config.headers.Authorization = `Bearer ${this._accessToken}`;
+    private tokenRefresher() {
+        let isRefreshing: boolean = false;
+        let failedQueue: { 
+            resolve: (value: unknown) => void;
+            reject: (reason?: any) => void;
+        }[] = [];
+        
+        const processQueue = (error: AxiosError | null, token: string | null) => {
+            failedQueue.forEach((prom: { resolve: (value: unknown) => void; reject: (reason?: any) => void; }) => {
+                if (error) {
+                    prom.reject(error);
+                } else {
+                    prom.resolve(token);
+                }
+            })
+            failedQueue = []
+        }
+        
+        this._instance.interceptors.response.use(
+            (response) => {
+                console.log('refresh response')
+                return response;
+            },
+            async (error) => { // НЕ ВЫЗЫВАЕТСЯ хер знает почему
+                const authStore = useAuthenticationStore();
+                const originalRequest = error.config;
+                if (error.response?.status === 401 && !originalRequest._retry) {
+                    if (isRefreshing) {
+                        return new Promise((resolve, reject) => {
+                            failedQueue.push({ resolve, reject });
+                        }).then((token) => {
+                            originalRequest.headers["Authorization"] = `Bearer ${token}`
+                            return this._instance(originalRequest)
+                        }).catch((err) => Promise.reject(err));
+                    }
+                    originalRequest._retry = true;
+                    isRefreshing = true;
+                    
+                    try {
+                        const refreshRequest = await axios.get(`api/User/refresh`, {withCredentials: true});
+                        const newToken: IAuthenticationResultObject = refreshRequest.data
+                        console.log(newToken);
+                        authStore.setToken(newToken.tokenString)
+                        this._instance.defaults.headers.common["Authorization"] = `Bearer ${newToken}`
+                        processQueue(null, newToken.tokenString)
+                        return this._instance(originalRequest)
+                    } catch (refreshError) {
+                        if (axios.isAxiosError(refreshError)) {
+                            processQueue(refreshError, null)
+                            authStore.deleteToken()
+                            console.log("refresh error", refreshError)
+                            return Promise.reject(refreshError)
+                        }
+
+                    } finally {
+                        isRefreshing = false;
+                    }
+                }
+                return Promise.reject(error)
             }
-            return config;
-        });
+        )
+    }
+    
+    private setupAccessToken() {
+        this._instance.interceptors.request.use(
+            (config: InternalAxiosRequestConfig) => {
+                const authStore = useAuthenticationStore();
+                if (authStore.token) {
+                    config.headers.Authorization = `Bearer ${authStore.token}`;
+                }
+                return config;
+        }
+        );
     }
 }

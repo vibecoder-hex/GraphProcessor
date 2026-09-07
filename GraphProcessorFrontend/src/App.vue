@@ -16,7 +16,7 @@
     import { onMounted } from 'vue';
     import { TokenProcessor} from "@/services/httpServices/ApiClientConfigurator.ts";
 
-    const authStore = useAuthenticationStore()
+   const authStore = useAuthenticationStore()
     
     onMounted(() => {
         const jwtToken = authStore.token
@@ -26,7 +26,7 @@
                 authStore.deleteToken()
             }
         }
-    })
+     })
 
 
 </script>

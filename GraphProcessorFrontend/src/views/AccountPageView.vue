@@ -7,8 +7,7 @@
     import router  from '@/router';
     import { ref } from 'vue'
     import { useAuthenticationStore } from '@/stores';
-
-    const apiUrl = '/api/User'
+    
 
     const errorMessage = ref<string>("")
     const accountDataObject = ref<IUserProfileData | null>(null)
@@ -16,7 +15,7 @@
     const authStore = useAuthenticationStore()
 
     async function loadProfile() {
-        const profileRequest = new ProfileRequests(apiUrl);
+        const profileRequest = new ProfileRequests();
         const response: IResponseOperationResult<IUserProfileData> = await profileRequest.getAccountData();
         
         if (response.operation.isValid) {

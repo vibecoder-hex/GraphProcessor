@@ -8,24 +8,22 @@ export interface IGraphAlgorithmsRequests {
 
 export class GraphAlgorithmsRequests implements IGraphAlgorithmsRequests {
     private readonly _algoClient: AxiosInstance;
-    private readonly _apiUrl: string;
     private readonly _selectedAlgorithm: Algorithm;
     private readonly _distanceJSONObject: IGraphParametersObject;
     private readonly _startVertex: string;
     private readonly _endVertex: string;
     
-    constructor(apiUrl: string, distanceJSONObject: IGraphParametersObject, selectedAlgorithm: Algorithm, startVertex: string, endVertex: string) {
-        this._apiUrl = apiUrl;
+    constructor(distanceJSONObject: IGraphParametersObject, selectedAlgorithm: Algorithm, startVertex: string, endVertex: string) {
         this._distanceJSONObject = distanceJSONObject;
         this._selectedAlgorithm= selectedAlgorithm;
         this._startVertex = startVertex;
         this._endVertex = endVertex;
-        const apiConfigurator = new ApiClientConfigurator(this._apiUrl);
-        this._algoClient = apiConfigurator.getInstance();
+        const apiInstance = ApiClientConfigurator.getInstance()
+        this._algoClient = apiInstance.getClient()
     }
     
     private getSelectedUrl() {
-        const baseUrl: string = `${this._selectedAlgorithm}/${this._startVertex}`
+        const baseUrl: string = `api/GraphAlgorithms/${this._selectedAlgorithm}/${this._startVertex}`
         switch (this._selectedAlgorithm) {
             case "bfs":
             case "dijkstra":

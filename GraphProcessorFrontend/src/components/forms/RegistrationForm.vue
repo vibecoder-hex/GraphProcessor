@@ -11,7 +11,7 @@
     import router from "@/router/index.ts"
     import { reactive, ref } from "vue";
 
-    const API_URL = "api/User"
+    const API_URL = "User"
     
     const authStore = useAuthenticationStore()
     
