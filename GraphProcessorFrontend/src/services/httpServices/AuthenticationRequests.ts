@@ -54,7 +54,7 @@ export class LoginRequests implements ILoginRequests {
     }
     public async logout(): Promise<void> {
         try {
-            await this._loginClient.get(`logout`);
+            await this._loginClient.get(`api/User/logout`);
         } catch (error) {
             console.error(ErrorHandler.handleError(error));
         }

@@ -35,15 +35,13 @@
 
     loadProfile();
 
-    function handleLogout() {
-        const loginRequests = new LoginRequests(apiUrl);
+    async function handleLogout() {
+        const loginRequests = new LoginRequests();
         const token: string | null = authStore.token;
         if (token !== null) {
-            Promise.all([
-                loginRequests.logout(),
-                router.push('/')
-            ])
             authStore.deleteToken()
+            window.location.href = "/"
+            await loginRequests.logout()
         }
     }
 

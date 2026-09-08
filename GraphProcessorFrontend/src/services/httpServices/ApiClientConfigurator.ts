@@ -189,7 +189,7 @@ export class ApiClientConfigurator implements IApiClientConfigurator {
                         if (axios.isAxiosError(refreshError)) {
                             processQueue(refreshError, null)
                             authStore.deleteToken()
-                            console.log("refresh error", refreshError)
+                            window.location.href = '/login'
                             return Promise.reject(refreshError)
                         }
 

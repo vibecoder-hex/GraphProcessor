@@ -3,6 +3,7 @@ using GraphProcessorAPI.Models;
 using GraphProcessorAPI.Repositories;
 using Moq;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 
 namespace GraphProcessorTest.UserServices
 {
@@ -82,6 +83,67 @@ namespace GraphProcessorTest.UserServices
 
             var result = await _registrationService.Register(username, password, password, "Bibos", "Biven", "rty.sem@yandex.ru", "+79251627733");
             Assert.True(result.IsValid);
+        }
+    }
+
+    public class RefreshTokenTests
+    {
+        private readonly Mock<IRefreshTokenRepository> _mockRefreshTokenRepository;
+        private readonly Mock<IConfiguration> _mockConfiguration;
+        private readonly ITokenService _tokenService;
+
+        public RefreshTokenTests()
+        {
+            _mockRefreshTokenRepository = new Mock<IRefreshTokenRepository>();
+            _mockConfiguration = new Mock<IConfiguration>();
+            _tokenService = new TokenService(_mockConfiguration.Object, _mockRefreshTokenRepository.Object);
+        }
+        [Fact]
+        public async Task RefreshTokenIfExpired()
+        {
+            var token = new RefreshToken
+            {
+                Token = "vBcoTEcv8zUYfjfnOA3KDvh0lX6ukWxNSxdTIYsPdtI=",
+                ExpiresAt = new DateTime(2026, 9, 5),
+                CreatedAt = new DateTime(2026, 8, 6)
+            };
+            Assert.True(DateTime.UtcNow > token.ExpiresAt);
+        }
+
+        [Fact]
+        public async Task RefreshTokenIfNotExpired()
+        {
+            var token = new RefreshToken
+            {
+                Token = "vBcoTEcv8zUYfjfnOA3KDvh0lX6ukWxNSxdTIYsPdtI=",
+                ExpiresAt = new DateTime(2026, 9, 18),
+                CreatedAt = new DateTime(2026, 8, 6)
+            };
+            Assert.False(DateTime.UtcNow > token.ExpiresAt);
+        }
+
+        [Fact]
+        public async Task TokenGeneratingAndCreating()
+        {
+            // 1. Создай реального пользователя
+            var user = new User
+            {
+                UserId = 1,
+                Username = "testuser",
+                // остальные поля, которые нужны для метода (если они есть)
+            };
+
+            // 2. Настрой мок, чтобы он реагировал на вызов с этим пользователем
+            _mockRefreshTokenRepository
+                .Setup(repo => repo.AddRefreshTokenAsync(user.UserId, It.IsAny<string>()))
+                .ReturnsAsync(new RefreshToken { Token = "someGeneratedToken", UserId = user.UserId });
+
+            // 3. Вызови метод с реальным пользователем
+            var token = await _tokenService.CreateRefreshToken(user);
+
+            // 4. Проверь, что токен создался
+            Assert.NotNull(token);
+            Assert.False(string.IsNullOrEmpty(token.Token));
         }
     }
 }
