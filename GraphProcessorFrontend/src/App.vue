@@ -18,15 +18,7 @@
 
    const authStore = useAuthenticationStore()
     
-    onMounted(() => {
-        const jwtToken = authStore.token
-        if (jwtToken !== null) {
-            const tokenProcessor = new TokenProcessor(jwtToken)
-            if (!tokenProcessor.isTokenValid()) {
-                authStore.deleteToken()
-            }
-        }
-     })
+
 
 
 </script>
