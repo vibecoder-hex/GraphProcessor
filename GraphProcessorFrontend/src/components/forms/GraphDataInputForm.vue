@@ -15,6 +15,7 @@
     import  { type IGraphAlgorithmsRequests, GraphAlgorithmsRequests } from "@/services/httpServices/GraphAlgorithmsRequests.ts";
     import {NetworkCanvasProcessor} from "@/services/graphServices/networkCanvasService.ts";
     import { DataSet, type Edge, type Node } from "vis-network/standalone"
+    import GraphProjectInputfield from "@/components/forms/form_components/fields/GraphProjectInputfield.vue";
     
     const selectedAlgorithm = ref<Algorithm>("dijkstra")
 
@@ -30,6 +31,10 @@
 
     const selectedGraphType = ref<GraphType>("oriented")
     const isGraphTypeSelected = ref<boolean>(false)
+    
+    const graphName = ref<string>("")
+    const graphDescription = ref<string>("")
+    const saveGraphAsProject = ref<boolean>(false)
 
     function getObjectFromMap(): IGraphParametersObject {
         const distanceObject: IGraphParametersObject = { Distances: {} }
@@ -74,8 +79,10 @@
                                      v-model:targetVertex="targetVertex"
             />
             <button class="button is-primary" @click="handleRequestedPath()">Send path</button>
-            <div v-if="graphProcessingResult">
+            <div v-if="graphProcessingResult" class="graph-result">
                 <DistanceProcessingResult :result="graphProcessingResult.result"/>
+                <GraphProjectInputfield v-model:graphName="graphName" v-model:graphDescription="graphDescription"/>
+                <button class="button is-success">Save graph with path result</button>
             </div>
             <div>{{ errorMessage }}</div>
         </div>
@@ -100,4 +107,10 @@
         width: 90%;
         margin: 0 auto;
     }
+        .graph-result {
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+        }
+
 </style>

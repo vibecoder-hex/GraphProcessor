@@ -86,8 +86,8 @@ namespace GraphProcessorAPI.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("GraphId"));
 
-                    b.Property<DateOnly>("Creationat")
-                        .HasColumnType("date")
+                    b.Property<DateTime>("Creationat")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("creationat");
 
                     b.Property<string>("Description")

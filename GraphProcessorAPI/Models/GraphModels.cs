@@ -11,7 +11,7 @@
 
         public string? Description { get; set; }
 
-        public DateOnly Creationat { get; set; }
+        public DateTime Creationat { get; set; }
 
         public string Structure { get; set; } = null!;
 
