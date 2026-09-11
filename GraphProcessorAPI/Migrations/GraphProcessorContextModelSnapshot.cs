@@ -23,11 +23,8 @@ namespace GraphProcessorAPI.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "accountrole", new[] { "admin", "user" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "accountrole", "user_role", new[] { "user", "admin" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "algorithm_type", new[] { "bfs", "dfs", "dijkstra" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "algorithm_type", "algorithm_type", new[] { "dfs", "bfs", "dijkstra" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "graphtype", new[] { "non_oriented", "oriented" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "graphtype", "graph_type", new[] { "oriented", "non_oriented" });
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("GraphProcessorAPI.Models.Edge", b =>
@@ -102,7 +99,7 @@ namespace GraphProcessorAPI.Migrations
 
                     b.Property<string>("Structure")
                         .IsRequired()
-                        .HasColumnType("json")
+                        .HasColumnType("jsonb")
                         .HasColumnName("structure");
 
                     b.Property<GraphType>("Type")

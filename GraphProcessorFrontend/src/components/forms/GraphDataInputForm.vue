@@ -1,5 +1,5 @@
 <script setup lang="ts">
-    import { ref } from 'vue'
+import {reactive, ref} from 'vue'
     import UserInputVertexField from './form_components/fields/UserInputVertexField.vue'
     import PathSearchField from "@/components/forms/form_components/fields/PathSearchField.vue";
     import AlgorithmSelector from "@/components/forms/form_components/selectors/AlgorithmSelector.vue";
@@ -10,12 +10,14 @@
       IGraphParametersObject,
       IResponseOperationResult,
       Algorithm,
-      GraphType
+      GraphType,
+        ICreateProjectObject
     } from "@/models/interfacesAndTypes.ts"
     import  { type IGraphAlgorithmsRequests, GraphAlgorithmsRequests } from "@/services/httpServices/GraphAlgorithmsRequests.ts";
     import {NetworkCanvasProcessor} from "@/services/graphServices/networkCanvasService.ts";
     import { DataSet, type Edge, type Node } from "vis-network/standalone"
     import GraphProjectInputfield from "@/components/forms/form_components/fields/GraphProjectInputfield.vue";
+import {GraphProjectRequests, type IGraphProjectRequests} from "@/services/httpServices/GraphProjectRequests.ts";
     
     const selectedAlgorithm = ref<Algorithm>("dijkstra")
 
@@ -31,10 +33,9 @@
 
     const selectedGraphType = ref<GraphType>("oriented")
     const isGraphTypeSelected = ref<boolean>(false)
-    
+
     const graphName = ref<string>("")
     const graphDescription = ref<string>("")
-    const saveGraphAsProject = ref<boolean>(false)
 
     function getObjectFromMap(): IGraphParametersObject {
         const distanceObject: IGraphParametersObject = { Distances: {} }
@@ -62,6 +63,21 @@
         }
     }
     
+    async function handleCreateProject(): Promise<void> {
+        console.log(distanceMap.value)
+        const createProjectRequests: IGraphProjectRequests = new GraphProjectRequests(
+            graphName.value,
+            graphDescription.value,
+            getObjectFromMap(),
+            selectedGraphType.value);
+        const projRequest: IResponseOperationResult<null> = await createProjectRequests.createProject();
+        if (projRequest.operation.isValid) {
+            errorMessage.value = "Succesfully created";
+        } else {
+            errorMessage.value = projRequest.operation.errorMessage;
+        }
+    }
+    
 </script>
 
 <template>
@@ -82,7 +98,7 @@
             <div v-if="graphProcessingResult" class="graph-result">
                 <DistanceProcessingResult :result="graphProcessingResult.result"/>
                 <GraphProjectInputfield v-model:graphName="graphName" v-model:graphDescription="graphDescription"/>
-                <button class="button is-success">Save graph with path result</button>
+                <button class="button is-success" @click="handleCreateProject()">Save graph with path result</button>
             </div>
             <div>{{ errorMessage }}</div>
         </div>

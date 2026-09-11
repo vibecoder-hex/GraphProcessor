@@ -1,10 +1,14 @@
 using GraphProcessorAPI.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace GraphProcessorAPI.Repositories;
 
 public interface IGraphProjectRepository
 {
-    Task<Graph?> AddGraphProjectAsync(int userId, string graphName, string graphDescription, GraphType graphType, string graphStructure);
+    Task<Graph?> AddGraphProjectAsync(int userId, string graphName, string graphDescription, GraphType graphType, Dictionary<string, Dictionary<string, int>> graphStructure);
+    Task<List<Graph>?> GetGraphProjectsAsync(int userId);
+    Task<Graph?> GetGraphProjectAsync(int userId, string graphName);
+    Task DeleteGraphProjectAsync(int userId, string graphName);
 }
 
 public class GraphProjectRepository : IGraphProjectRepository
@@ -17,7 +21,7 @@ public class GraphProjectRepository : IGraphProjectRepository
     }
 
     public async Task<Graph?> AddGraphProjectAsync(int userId, string graphName, string graphDescription,
-        GraphType graphType, string graphStructure)
+        GraphType graphType, Dictionary<string, Dictionary<string, int>> graphStructure)
     {
         var graph = new Graph()
         {
@@ -28,8 +32,33 @@ public class GraphProjectRepository : IGraphProjectRepository
             UserId = userId,
             Structure = graphStructure
         };
-        _dbContext.Add(graph);
+        _dbContext.Graphs.Add(graph);
         await _dbContext.SaveChangesAsync();
         return graph;
+    }
+
+    public async Task<List<Graph>?> GetGraphProjectsAsync(int userId)
+    {
+        var graphList = await _dbContext.Graphs
+            .Where(graph => graph.UserId == userId)
+            .ToListAsync();
+        return graphList;
+    }
+
+    public async Task<Graph?> GetGraphProjectAsync(int userId, string graphName)
+    {
+        var graphProject = await _dbContext.Graphs
+            .Where(graph => graph.Name == graphName && graph.UserId == userId)
+            .FirstOrDefaultAsync();
+        return graphProject;
+    }
+
+    public async Task DeleteGraphProjectAsync(int userId, string graphName)
+    {
+        var graphProject = await _dbContext.Graphs
+            .Where(graph => graph.UserId == userId)
+            .FirstOrDefaultAsync();
+        _dbContext.Graphs.Remove(graphProject);
+        await _dbContext.SaveChangesAsync();
     }
 }

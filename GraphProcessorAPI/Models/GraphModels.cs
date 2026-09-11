@@ -1,6 +1,7 @@
 ﻿namespace GraphProcessorAPI.Models
 {
     public enum AlgorithmType { Dfs, Bfs, Dijkstra }
+    
     public enum GraphType { Oriented, NonOriented }
 
     public partial class Graph
@@ -13,7 +14,7 @@
 
         public DateTime Creationat { get; set; }
 
-        public string Structure { get; set; } = null!;
+        public Dictionary<string, Dictionary<string, int>> Structure { get; set; } = null!;
 
         public GraphType Type { get; set; }
 

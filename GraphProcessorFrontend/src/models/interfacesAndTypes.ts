@@ -1,3 +1,5 @@
+import type {IGraphProjectRequests} from "@/services/httpServices/GraphProjectRequests.ts";
+
 export type allPossibleDataType = string | number | boolean | string[] | number[] | boolean[] | null
 export type Algorithm = "bfs" | "dfs" | "dijkstra"
 export type GraphType = "oriented" | "non-oriented"
@@ -77,4 +79,11 @@ export interface IBadRequestBody {
     errors: {
         [errorType: string]: string[]
     }
+}
+
+export interface ICreateProjectObject {
+    graphName: string,
+    graphDescription: string,
+    graphType: GraphType,
+    graphStructure: IGraphParametersObject
 }

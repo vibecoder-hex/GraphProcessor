@@ -1,4 +1,5 @@
-﻿using GraphProcessorAPI.Models;
+﻿using System.Text.Json;
+using GraphProcessorAPI.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace GraphProcessorAPI.Repositories;
@@ -30,10 +31,6 @@ public partial class GraphProcessorContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder
-            .HasPostgresEnum<UserRole>("accountrole")
-            .HasPostgresEnum<AlgorithmType>("algorithm_type")
-            .HasPostgresEnum<GraphType>("graphtype");
 
         modelBuilder.Entity<Edge>(entity =>
         {
@@ -80,13 +77,16 @@ public partial class GraphProcessorContext : DbContext
                 .HasMaxLength(40)
                 .HasColumnName("name");
             entity.Property(e => e.Structure)
-                .HasColumnType("json")
+                .HasConversion(
+                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                    v => JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, int>>>(v,  
+                        (JsonSerializerOptions?)null) ?? new Dictionary<string, Dictionary<string, int>>())
+                .HasColumnType("jsonb")
                 .HasColumnName("structure");
             entity.Property(e => e.UserId).HasColumnName("user_id");
             entity.Property(e => e.Type)
                 .HasColumnName("type")
                 .HasColumnType("graphtype");
-
             entity.HasOne(d => d.User).WithMany(p => p.Graphs)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
