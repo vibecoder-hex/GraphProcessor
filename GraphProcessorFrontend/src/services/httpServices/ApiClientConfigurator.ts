@@ -91,7 +91,6 @@ export class ErrorHandler {
             const errorMessages: string = Object.entries(errorObj)
                 .map(([key, value]) => `${key}: ${value.join(', ')}`)
                 .join('; ')
-            console.error(errorMessages)
             return `${errorTitle}: ${errorMessages}`
         }
         return "Validation error"
@@ -158,10 +157,7 @@ export class ApiClientConfigurator implements IApiClientConfigurator {
         }
         
         this._instance.interceptors.response.use(
-            (response) => {
-                console.log('refresh response')
-                return response;
-            },
+            (response) => response,
             async (error) => { // НЕ ВЫЗЫВАЕТСЯ хер знает почему
                 const authStore = useAuthenticationStore();
                 const originalRequest = error.config;
@@ -180,7 +176,6 @@ export class ApiClientConfigurator implements IApiClientConfigurator {
                     try {
                         const refreshRequest = await axios.get(`api/User/refresh`, {withCredentials: true});
                         const newToken: IAuthenticationResultObject = refreshRequest.data
-                        console.log(newToken);
                         authStore.setToken(newToken.tokenString)
                         this._instance.defaults.headers.common["Authorization"] = `Bearer ${newToken}`
                         processQueue(null, newToken.tokenString)

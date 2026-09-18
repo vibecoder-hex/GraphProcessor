@@ -7,8 +7,7 @@
     import { ref, reactive, computed } from "vue";
 
     const authStore = useAuthenticationStore();
-
-    const authResultMessage = ref<string>("")
+    
     const errorMessage = ref<string>("")
     
     const loginObject = reactive<ILoginObject>({ username: "", password: "" })
@@ -32,7 +31,6 @@
                 errorMessage.value = "";
             }
         } else {
-            authResultMessage.value = "";
             errorMessage.value = loginResponse.operation.errorMessage;
         }
     }
@@ -43,7 +41,6 @@
         <h1 class="is-size-3">Login</h1>
         <LoginDataField v-model:loginObject="loginObject"/>
         <p class="has-text-danger">{{ errorMessage }}</p>
-        <p class="has-text-success">{{ authResultMessage }}</p>
         <button :disabled="!isPasswordValid || !isLoginValid" class="button is-success" @click="handleLogin()">Sign in</button>
     </div>
 

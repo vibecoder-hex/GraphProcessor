@@ -9,6 +9,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AWSSDK.Core" Version="4.0.102.5" />
+    <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.101.3" />
+    <PackageReference Include="AWSSDK.S3" Version="4.0.103.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.7" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.7">
       <PrivateAssets>all</PrivateAssets>

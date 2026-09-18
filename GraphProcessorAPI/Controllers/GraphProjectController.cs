@@ -3,6 +3,7 @@ using GraphProcessorAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using GraphProcessorAPI.Repositories;
+using GraphProcessorAPI.Services.ExternalServices;
 
 namespace GraphProcessorAPI.Controllers;
 
@@ -13,11 +14,13 @@ public class GraphProjectController : ControllerBase
 {
     private readonly IGraphProjectRepository _projectRepository;
     private readonly ILogger<GraphProjectController> _logger;
+    private readonly IObjectStorageService _storageService;
 
-    public GraphProjectController(IGraphProjectRepository projectRepository,  ILogger<GraphProjectController> logger)
+    public GraphProjectController(IGraphProjectRepository projectRepository,  ILogger<GraphProjectController> logger,  IObjectStorageService storageService)
     {
         _projectRepository = projectRepository;
         _logger = logger;
+        _storageService = storageService;
     }
 
     [HttpPost]
@@ -84,19 +87,20 @@ public class GraphProjectController : ControllerBase
         if (int.TryParse(claimUserId, out int userId))
         {
             var existingProject = await _projectRepository.GetGraphProjectAsync(userId, graphName);
-            if (existingProject != null)
+            if (existingProject == null)
             {
                 return BadRequest(new
                 {
                     title = "Project deletion failed",
                     errors = new
                     {
-                        Details = new[] {$"Graph with name {graphName} already exists"}
+                        Details = new[] {$"Graph with name {graphName} is not found"}
                     }
                 });
             }
 
             await _projectRepository.DeleteGraphProjectAsync(userId, graphName);
+            return  Ok(new { Message = "Successfully deleted graph project" });
         }
         return Unauthorized(new { Error = "Username does not found in http context" });
     }

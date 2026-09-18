@@ -4,9 +4,10 @@
 
     import { ProfileRequests } from '@/services/httpServices/AccountRequests';
     import { LoginRequests } from "@/services/httpServices/AuthenticationRequests.ts";
-    import router  from '@/router';
     import { ref } from 'vue'
     import { useAuthenticationStore } from '@/stores';
+    import {ApiClientConfigurator} from "@/services/httpServices/ApiClientConfigurator.ts";
+    import type {AxiosInstance} from "axios";
     
 
     const errorMessage = ref<string>("")
@@ -14,9 +15,11 @@
     
     const authStore = useAuthenticationStore()
 
+    const apiInstance: ApiClientConfigurator = ApiClientConfigurator.getInstance();
+    const apiClient: AxiosInstance = apiInstance.getClient()
+
     async function loadProfile() {
-        const profileRequest = new ProfileRequests();
-        const response: IResponseOperationResult<IUserProfileData> = await profileRequest.getAccountData();
+        const response: IResponseOperationResult<IUserProfileData> = await ProfileRequests.getAccountData(apiClient);
         
         if (response.operation.isValid) {
             const profileData: IUserProfileData | null = response.responseData;
@@ -36,12 +39,11 @@
     loadProfile();
 
     async function handleLogout() {
-        const loginRequests = new LoginRequests();
         const token: string | null = authStore.token;
         if (token !== null) {
             authStore.deleteToken()
             window.location.href = "/"
-            await loginRequests.logout()
+            await LoginRequests.logout(apiClient)
         }
     }
 

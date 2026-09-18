@@ -6,7 +6,7 @@ namespace GraphProcessorAPI.Repositories;
 public interface IGraphProjectRepository
 {
     Task<Graph?> AddGraphProjectAsync(int userId, string graphName, string graphDescription, GraphType graphType, Dictionary<string, Dictionary<string, int>> graphStructure);
-    Task<List<Graph>?> GetGraphProjectsAsync(int userId);
+    Task<List<Graph>> GetGraphProjectsAsync(int userId);
     Task<Graph?> GetGraphProjectAsync(int userId, string graphName);
     Task DeleteGraphProjectAsync(int userId, string graphName);
 }
@@ -37,7 +37,7 @@ public class GraphProjectRepository : IGraphProjectRepository
         return graph;
     }
 
-    public async Task<List<Graph>?> GetGraphProjectsAsync(int userId)
+    public async Task<List<Graph>> GetGraphProjectsAsync(int userId)
     {
         var graphList = await _dbContext.Graphs
             .Where(graph => graph.UserId == userId)
@@ -56,7 +56,7 @@ public class GraphProjectRepository : IGraphProjectRepository
     public async Task DeleteGraphProjectAsync(int userId, string graphName)
     {
         var graphProject = await _dbContext.Graphs
-            .Where(graph => graph.UserId == userId)
+            .Where(graph => graph.UserId == userId  && graph.Name == graphName)
             .FirstOrDefaultAsync();
         _dbContext.Graphs.Remove(graphProject);
         await _dbContext.SaveChangesAsync();

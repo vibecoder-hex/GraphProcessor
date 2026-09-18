@@ -1,6 +1,7 @@
 using GraphProcessorAPI.Repositories;
 using GraphProcessorAPI.Models;
 using GraphProcessorAPI.Services;
+using GraphProcessorAPI.Services.ExternalServices;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using System.Text;
 using System.Text.Json.Serialization;
+using Amazon.S3;
 
 var builder = WebApplication.CreateBuilder(args);
 var databaseConnectionString = builder.Configuration["ConnectionStrings:DefaultConnection"];
@@ -42,6 +44,7 @@ builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IRegistrationService, RegistrationService>();
 builder.Services.AddScoped<IGraphProjectRepository, GraphProjectRepository>();
+builder.Services.AddScoped<IObjectStorageService, ObjectStorageService>();
 
 
 builder.Services.AddDbContextPool<GraphProcessorContext>(options =>
@@ -53,6 +56,8 @@ builder.Services.AddDbContextPool<GraphProcessorContext>(options =>
             o.MapEnum<AlgorithmType>("algorithm_type");
         }
     ));
+
+builder.Services.AddAWSService<IAmazonS3>(builder.Configuration.GetAWSOptions());
 
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

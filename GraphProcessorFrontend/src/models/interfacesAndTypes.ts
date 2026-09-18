@@ -1,4 +1,4 @@
-import type {IGraphProjectRequests} from "@/services/httpServices/GraphProjectRequests.ts";
+import type { IGraphProjectRequests } from "@/services/httpServices/GraphProjectRequests.ts";
 
 export type allPossibleDataType = string | number | boolean | string[] | number[] | boolean[] | null
 export type Algorithm = "bfs" | "dfs" | "dijkstra"
@@ -86,4 +86,13 @@ export interface ICreateProjectObject {
     graphDescription: string,
     graphType: GraphType,
     graphStructure: IGraphParametersObject
+}
+
+export interface IGraphProjectObject {
+    name: string,
+    description: string,
+    type: GraphType,
+    creationat: string,
+    structure: IDistanceStructureObject,
+    userId: number
 }

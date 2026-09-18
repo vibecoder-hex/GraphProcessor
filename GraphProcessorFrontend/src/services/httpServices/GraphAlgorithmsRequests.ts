@@ -1,41 +1,24 @@
 import axios, {type AxiosInstance} from 'axios'
 import type { IGraphParametersObject, IResponseOperationResult, IDistanceProcessingRootObject, Algorithm } from "@/models/interfacesAndTypes.ts";
-import {ApiClientConfigurator, ErrorHandler} from "@/services/httpServices/ApiClientConfigurator.ts";
+import {ErrorHandler} from "@/services/httpServices/ApiClientConfigurator.ts";
 
-export interface IGraphAlgorithmsRequests {
-    getPathFromRequest(): Promise<IResponseOperationResult<IDistanceProcessingRootObject>>
-}
 
-export class GraphAlgorithmsRequests implements IGraphAlgorithmsRequests {
-    private readonly _algoClient: AxiosInstance;
-    private readonly _selectedAlgorithm: Algorithm;
-    private readonly _distanceJSONObject: IGraphParametersObject;
-    private readonly _startVertex: string;
-    private readonly _endVertex: string;
-    
-    constructor(distanceJSONObject: IGraphParametersObject, selectedAlgorithm: Algorithm, startVertex: string, endVertex: string) {
-        this._distanceJSONObject = distanceJSONObject;
-        this._selectedAlgorithm= selectedAlgorithm;
-        this._startVertex = startVertex;
-        this._endVertex = endVertex;
-        const apiInstance = ApiClientConfigurator.getInstance()
-        this._algoClient = apiInstance.getClient()
-    }
-    
-    private getSelectedUrl() {
-        const baseUrl: string = `api/GraphAlgorithms/${this._selectedAlgorithm}/${this._startVertex}`
-        switch (this._selectedAlgorithm) {
+export class GraphAlgorithmsRequests {
+    private static getSelectedUrl(startVertex: string, targetVertex: string, selectedAlgorithm: string): string {
+        const baseUrl: string = `api/GraphAlgorithms/${selectedAlgorithm}/${startVertex}`
+        switch (selectedAlgorithm) {
             case "bfs":
             case "dijkstra":
-                return `${baseUrl}/${this._endVertex}`
+                return `${baseUrl}/${targetVertex}`
             case "dfs":
                 return baseUrl
         }
+        return `${baseUrl}`
     }
     
-    public async getPathFromRequest(): Promise<IResponseOperationResult<IDistanceProcessingRootObject>> {
+    public static async getPathFromRequest(algoClient: AxiosInstance, startVertex: string, targetVertex: string, selectedAlgorithm: string, distanceJSONObject: IGraphParametersObject): Promise<IResponseOperationResult<IDistanceProcessingRootObject>> {
         try {
-            const response = await this._algoClient.post(this.getSelectedUrl(), this._distanceJSONObject)
+            const response = await algoClient.post<IDistanceProcessingRootObject>(this.getSelectedUrl(startVertex, targetVertex, selectedAlgorithm), distanceJSONObject)
             return {
                 operation: {
                     isValid: true,

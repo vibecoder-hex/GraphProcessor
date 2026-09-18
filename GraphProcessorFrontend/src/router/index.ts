@@ -4,6 +4,7 @@ import AboutPageView from "../views/AboutPageView.vue"
 import LoginView from '@/views/LoginView.vue'
 import RegistrationView from "@/views/RegistrationView.vue";
 import AccountPageView from '@/views/AccountPageView.vue'
+import GraphProjectsView from "@/views/GraphProjectsView.vue";
 import { useAuthenticationStore } from '@/stores/index.ts'
 
 const router = createRouter({
@@ -13,7 +14,8 @@ const router = createRouter({
         { path: '/about', component: AboutPageView },
         { path: '/login', component: LoginView },
         { path: '/register', component: RegistrationView },
-        { path: '/account', component: AccountPageView, meta: { requiresAuth: true } }
+        { path: '/account', component: AccountPageView, meta: { requiresAuth: true } },
+        { path: '/projects', component: GraphProjectsView, meta: { requiresAuth: true } }
     ],
 })
 

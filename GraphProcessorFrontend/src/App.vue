@@ -4,6 +4,7 @@
         <RouterLink v-if="!authStore.isAuthenticated" class="navbar-item" to="/login">Sign in</RouterLink>
         <RouterLink v-if="!authStore.isAuthenticated" class="navbar-item" to="/register">Sign up</RouterLink>
         <RouterLink v-if="authStore.isAuthenticated" class="navbar-item" to="/account">Account</RouterLink>
+        <RouterLink v-if="authStore.isAuthenticated" class="navbar-item" to="/projects">My projects</RouterLink>
         <RouterLink class="navbar-item" to="/about">About</RouterLink>
     </nav>
     <main>
@@ -17,10 +18,6 @@
     import { TokenProcessor} from "@/services/httpServices/ApiClientConfigurator.ts";
 
    const authStore = useAuthenticationStore()
-    
-
-
-
 </script>
 
 

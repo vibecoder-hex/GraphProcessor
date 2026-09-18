@@ -10,6 +10,7 @@
 
     const props = defineProps<IProps>()
     
+    
     const networkContainer = ref<HTMLElement | null>(null)
     let network: Network | null = null
     
@@ -27,6 +28,8 @@
             network = null
         }
     })
+    
+    
 </script>
 
 <template>

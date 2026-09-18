@@ -13,11 +13,13 @@ import {reactive, ref} from 'vue'
       GraphType,
         ICreateProjectObject
     } from "@/models/interfacesAndTypes.ts"
-    import  { type IGraphAlgorithmsRequests, GraphAlgorithmsRequests } from "@/services/httpServices/GraphAlgorithmsRequests.ts";
+    import  { GraphAlgorithmsRequests } from "@/services/httpServices/GraphAlgorithmsRequests.ts";
     import {NetworkCanvasProcessor} from "@/services/graphServices/networkCanvasService.ts";
     import { DataSet, type Edge, type Node } from "vis-network/standalone"
     import GraphProjectInputfield from "@/components/forms/form_components/fields/GraphProjectInputfield.vue";
-import {GraphProjectRequests, type IGraphProjectRequests} from "@/services/httpServices/GraphProjectRequests.ts";
+    import { GraphProjectRequests } from "@/services/httpServices/GraphProjectRequests.ts";
+    import { ApiClientConfigurator } from "@/services/httpServices/ApiClientConfigurator.ts";
+    import type { AxiosInstance } from "axios";
     
     const selectedAlgorithm = ref<Algorithm>("dijkstra")
 
@@ -36,6 +38,11 @@ import {GraphProjectRequests, type IGraphProjectRequests} from "@/services/httpS
 
     const graphName = ref<string>("")
     const graphDescription = ref<string>("")
+    
+    const selectedGraphCanvas = ref<HTMLCanvasElement | null>(null)
+
+    const apiInstance: ApiClientConfigurator = ApiClientConfigurator.getInstance();
+    const apiClient: AxiosInstance = apiInstance.getClient();
 
     function getObjectFromMap(): IGraphParametersObject {
         const distanceObject: IGraphParametersObject = { Distances: {} }
@@ -46,8 +53,7 @@ import {GraphProjectRequests, type IGraphProjectRequests} from "@/services/httpS
     }
       
     async function handleRequestedPath(): Promise<void> {
-        const graphAlgorithmsRequests: IGraphAlgorithmsRequests = new GraphAlgorithmsRequests(getObjectFromMap(), selectedAlgorithm.value, startVertex.value, targetVertex.value)
-        const pathRequest: IResponseOperationResult<IDistanceProcessingRootObject> = await graphAlgorithmsRequests.getPathFromRequest();
+        const pathRequest = await GraphAlgorithmsRequests.getPathFromRequest(apiClient, startVertex.value, targetVertex.value, selectedAlgorithm.value, getObjectFromMap());
         if (pathRequest.operation.isValid) {
             const shortestPath: IDistanceProcessingRootObject | null  = pathRequest.responseData
             if (shortestPath !== null) {
@@ -65,12 +71,12 @@ import {GraphProjectRequests, type IGraphProjectRequests} from "@/services/httpS
     
     async function handleCreateProject(): Promise<void> {
         console.log(distanceMap.value)
-        const createProjectRequests: IGraphProjectRequests = new GraphProjectRequests(
+        const projRequest: IResponseOperationResult<null> = await GraphProjectRequests.createProject(
+            apiClient,
             graphName.value,
             graphDescription.value,
             getObjectFromMap(),
             selectedGraphType.value);
-        const projRequest: IResponseOperationResult<null> = await createProjectRequests.createProject();
         if (projRequest.operation.isValid) {
             errorMessage.value = "Succesfully created";
         } else {

@@ -2,39 +2,23 @@ import type { IResponseOperationResult, ILoginObject, IRegisterObject, IAuthenti
 import axios, {type AxiosInstance} from "axios";
 import { ApiClientConfigurator, ErrorHandler } from "@/services/httpServices/ApiClientConfigurator.ts";
 
-export interface ILoginRequests {
-    login() : Promise<IResponseOperationResult<IAuthenticationResultObject>>
-    logout(accessToken: string): Promise<void>
-}
-
 export interface IRegistrationRequests {
     register(): Promise<IResponseOperationResult<IAuthenticationResultObject>>
 }
 
-export class LoginRequests implements ILoginRequests {
-    private readonly _loginClient: AxiosInstance
-    private readonly _username: string
-    private readonly _password: string
-
-    constructor(username: string = "", password: string = "") {
-        this._username = username
-        this._password = password
-        const apiInstance = ApiClientConfigurator.getInstance()
-        this._loginClient = apiInstance.getClient()
-    }
-
-    private getLoginObject(): ILoginObject {
+export class LoginRequests {
+    private static getLoginObject(username: string, password: string): ILoginObject {
         return {
-            username: this._username,
-            password: this._password
+            username: username,
+            password: password
         }
     }
     
 
-    public async login(): Promise<IResponseOperationResult<IAuthenticationResultObject>> {
-        const loginObject: ILoginObject = this.getLoginObject();
+    public static async login(loginClient: AxiosInstance, username: string, password: string): Promise<IResponseOperationResult<IAuthenticationResultObject>> {
+        const loginObject: ILoginObject = this.getLoginObject(username, password);
         try {
-            const response = await this._loginClient.post(`api/User/login`, loginObject);
+            const response = await loginClient.post<IAuthenticationResultObject>(`api/User/login`, loginObject);
             return {
                 operation : {
                     isValid: true,
@@ -52,9 +36,9 @@ export class LoginRequests implements ILoginRequests {
             }
         }
     }
-    public async logout(): Promise<void> {
+    public static async logout(loginClient: AxiosInstance): Promise<void> {
         try {
-            await this._loginClient.get(`api/User/logout`);
+            await loginClient.get(`api/User/logout`);
         } catch (error) {
             console.error(ErrorHandler.handleError(error));
         }
