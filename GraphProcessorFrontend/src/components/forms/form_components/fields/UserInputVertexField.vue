@@ -10,13 +10,14 @@
     const visNodes = defineModel<DataSet<Node>>("visNodes", {required: true});
     const visEdges = defineModel<DataSet<Edge>>("visEdges", {required: true});
     const selectedGraphType = defineModel<GraphType>("selectedGraphType", { required: true });
+    const selectedGraphCanvas = defineModel<HTMLCanvasElement | null>("selectedGraphCanvas");
     
     const nodeNameValue = ref<string>("")
     const fromNodeValue = ref<string>("")
     const toNodeValue = ref<string>("")
     const distanceNumber = ref(0)
     
-    const showCanvas = ref<boolean>(false)
+    const showCanvas = ref<boolean>(true)
     
     const nodeCardMessage = ref<string>("")
     const edgeCardMessage = ref<string>("")
@@ -94,7 +95,10 @@
         <label>Show graph canvas</label> 
         <input type="checkbox" v-model="showCanvas">
         <div v-if="showCanvas">
-            <NetworkVisualizationCanvas :visNodes="visNodes" :visEdges="visEdges"/>
+            <NetworkVisualizationCanvas 
+                v-model:selectedGraphCanvas="selectedGraphCanvas" 
+                :visNodes="visNodes" 
+                :visEdges="visEdges"/>
             <button class="button is-danger" @click="NetworkCanvasProcessor.ResetColors(visEdges)">Reset edge colors</button>
         </div>
     </div>

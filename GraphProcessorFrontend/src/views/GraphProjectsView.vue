@@ -1,11 +1,29 @@
 <template>
     <div class="graph-projects-view">
         <div v-for="project in projectList">
-            <p>{{ project.name }}</p>
-            <p> {{ project.description }} </p>
-            <p> {{ project.type }} </p>
-            <p> {{ JSON.stringify(project.structure) }} </p>
-            <p> {{ new Date(project.creationat).toUTCString()}}</p>
+          <div class="card">
+            <div class="card-image">
+              <figure class="image is-3by2">
+                <img
+                    :src="project.imageKey"
+                    alt="Placeholder image"
+                />
+              </figure>
+            </div>
+            <div class="card-content">
+              <div class="media">
+                <div class="media-content">
+                    <p class="title is-4">{{ project.graphName }}</p>
+                </div>
+              </div>
+
+              <div class="content">
+                {{ project.graphDescription }}
+                <br />
+                <time>{{ new Date(project.createdAt).toUTCString() }}</time>
+              </div>
+            </div>
+          </div>
         </div>
     </div>
     <p>{{ errorMessage }}</p>
@@ -15,14 +33,10 @@
     import { GraphProjectRequests } from "@/services/httpServices/GraphProjectRequests.ts";
     import { ref } from "vue"
     import type { IGraphProjectObject } from "@/models/interfacesAndTypes.ts";
-    import  { ApiClientConfigurator} from "@/services/httpServices/ApiClientConfigurator.ts";
-    import type {AxiosInstance} from "axios";
+    import  { apiClient } from "@/services/httpServices/ApiClientConfigurator.ts";
     
     const errorMessage = ref<string>("");
     const projectList = ref<IGraphProjectObject[]>([]);
-    
-    const apiInstance: ApiClientConfigurator = ApiClientConfigurator.getInstance();
-    const apiClient: AxiosInstance = apiInstance.getClient();
 
     async function handleLoadProjects(): Promise<void> {
         const response = await GraphProjectRequests.getProjects(apiClient);
@@ -37,5 +51,9 @@
 </script>
 
 <style scoped>
-
+  .graph-projects-view {
+      display: grid;
+      grid-template-columns: auto auto auto;
+      grid-gap: 20px;
+  }
 </style>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-    import { onMounted, onUnmounted, ref } from 'vue'
-    import { NetworkCanvasProcessor } from "@/services/graphServices/networkCanvasService.ts";
-    import type { DataSet, Node, Edge, Network } from "vis-network/standalone"
+import {onMounted, onUnmounted, ref} from 'vue'
+import {NetworkCanvasProcessor} from "@/services/graphServices/networkCanvasService.ts";
+import type {DataSet, Edge, Network, Node} from "vis-network/standalone"
 
     interface IProps {
         visNodes: DataSet<Node>,
@@ -9,7 +9,9 @@
     }
 
     const props = defineProps<IProps>()
+
     
+    const selectedGraphCanvas = defineModel<HTMLCanvasElement | null>("selectedGraphCanvas");
     
     const networkContainer = ref<HTMLElement | null>(null)
     let network: Network | null = null
@@ -19,6 +21,12 @@
             network = NetworkCanvasProcessor.DrawVis(networkContainer.value, props.visNodes, props.visEdges)
             network.setSize(networkContainer.value.offsetWidth.toString(), networkContainer.value.offsetHeight.toString());
             network.fit();
+            
+            if (network) {
+                network.on("afterDrawing", () => {
+                   selectedGraphCanvas.value = networkContainer.value ? networkContainer.value.querySelector("canvas") : null
+                })
+            }
         }
         
     })
@@ -28,7 +36,6 @@
             network = null
         }
     })
-    
     
 </script>
 

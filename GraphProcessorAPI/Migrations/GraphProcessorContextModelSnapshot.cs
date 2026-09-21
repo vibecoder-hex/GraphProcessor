@@ -91,6 +91,12 @@ namespace GraphProcessorAPI.Migrations
                         .HasColumnType("text")
                         .HasColumnName("description");
 
+                    b.Property<string>("Image")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("image");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(40)

@@ -10,8 +10,8 @@
     import { useAuthenticationStore } from "@/stores";
     import router from "@/router/index.ts"
     import { reactive, ref } from "vue";
-
-    const API_URL = "User"
+    import { apiClient } from "@/services/httpServices/ApiClientConfigurator.ts";
+    import type {AxiosInstance} from "axios";
     
     const authStore = useAuthenticationStore()
     
@@ -25,6 +25,7 @@
         email: "",
     }, )
     const errorMessage = ref<string>("")
+    
     
     function passwordValidator(password: string, repeatPassword: string): IOperationResult {
         if (password.trim().length < 6) {
@@ -72,9 +73,7 @@
             errorMessage.value = passwordValidationResult.errorMessage
             return
         }
-        
-        const registrationRequests = new RegistrationRequests(API_URL, registerObject);
-        const response: IResponseOperationResult<IAuthenticationResultObject> = await registrationRequests.register();
+        const response = await RegistrationRequests.register(apiClient, registerObject);
         if (response.operation.isValid) {
             const accessToken: IAuthenticationResultObject | null = response.responseData
             if (accessToken) {

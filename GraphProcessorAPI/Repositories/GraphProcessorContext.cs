@@ -24,11 +24,6 @@ public partial class GraphProcessorContext : DbContext
     
     public virtual DbSet<RefreshToken>  RefreshTokens { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-
-    }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
 
@@ -83,6 +78,9 @@ public partial class GraphProcessorContext : DbContext
                         (JsonSerializerOptions?)null) ?? new Dictionary<string, Dictionary<string, int>>())
                 .HasColumnType("jsonb")
                 .HasColumnName("structure");
+            entity.Property(e => e.Image)
+                .HasMaxLength(256)
+                .HasColumnName("image");
             entity.Property(e => e.UserId).HasColumnName("user_id");
             entity.Property(e => e.Type)
                 .HasColumnName("type")

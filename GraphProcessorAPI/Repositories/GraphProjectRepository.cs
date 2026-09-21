@@ -5,9 +5,9 @@ namespace GraphProcessorAPI.Repositories;
 
 public interface IGraphProjectRepository
 {
-    Task<Graph?> AddGraphProjectAsync(int userId, string graphName, string graphDescription, GraphType graphType, Dictionary<string, Dictionary<string, int>> graphStructure);
-    Task<List<Graph>> GetGraphProjectsAsync(int userId);
-    Task<Graph?> GetGraphProjectAsync(int userId, string graphName);
+    Task<Graph?> AddGraphProjectAsync(int userId, string graphName, string graphDescription, GraphType graphType, Dictionary<string, Dictionary<string, int>> graphStructure, string imageFilename);
+    Task<List<ProjectViewDto>> GetGraphProjectsAsync(int userId);
+    Task<ProjectViewDto?> GetGraphProjectAsync(int userId, string graphName);
     Task DeleteGraphProjectAsync(int userId, string graphName);
 }
 
@@ -21,7 +21,7 @@ public class GraphProjectRepository : IGraphProjectRepository
     }
 
     public async Task<Graph?> AddGraphProjectAsync(int userId, string graphName, string graphDescription,
-        GraphType graphType, Dictionary<string, Dictionary<string, int>> graphStructure)
+        GraphType graphType, Dictionary<string, Dictionary<string, int>> graphStructure, string imageFilename)
     {
         var graph = new Graph()
         {
@@ -30,27 +30,42 @@ public class GraphProjectRepository : IGraphProjectRepository
             Type = graphType,
             Creationat = DateTime.UtcNow,
             UserId = userId,
-            Structure = graphStructure
+            Structure = graphStructure,
+            Image = imageFilename
         };
         _dbContext.Graphs.Add(graph);
         await _dbContext.SaveChangesAsync();
         return graph;
     }
 
-    public async Task<List<Graph>> GetGraphProjectsAsync(int userId)
+    public async Task<List<ProjectViewDto>> GetGraphProjectsAsync(int userId)
     {
-        var graphList = await _dbContext.Graphs
+        return await _dbContext.Graphs
+            .AsNoTracking()
             .Where(graph => graph.UserId == userId)
+            .Select(graph => new ProjectViewDto(
+                graph.Name,
+                graph.Description,
+                graph.Type,
+                new DistanceDataJsonDTO(graph.Structure),
+                graph.Image,
+                graph.Creationat))
             .ToListAsync();
-        return graphList;
     }
 
-    public async Task<Graph?> GetGraphProjectAsync(int userId, string graphName)
+    public async Task<ProjectViewDto?> GetGraphProjectAsync(int userId, string graphName)
     {
-        var graphProject = await _dbContext.Graphs
+        return await _dbContext.Graphs
+            .AsNoTracking()
             .Where(graph => graph.Name == graphName && graph.UserId == userId)
+            .Select(graph => new ProjectViewDto(
+                graph.Name, 
+                graph.Description,
+                graph.Type,
+                new DistanceDataJsonDTO(graph.Structure),
+                graph.Image,
+                graph.Creationat))
             .FirstOrDefaultAsync();
-        return graphProject;
     }
 
     public async Task DeleteGraphProjectAsync(int userId, string graphName)

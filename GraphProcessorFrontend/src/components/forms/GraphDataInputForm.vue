@@ -11,14 +11,13 @@ import {reactive, ref} from 'vue'
       IResponseOperationResult,
       Algorithm,
       GraphType,
-        ICreateProjectObject
     } from "@/models/interfacesAndTypes.ts"
     import  { GraphAlgorithmsRequests } from "@/services/httpServices/GraphAlgorithmsRequests.ts";
     import {NetworkCanvasProcessor} from "@/services/graphServices/networkCanvasService.ts";
     import { DataSet, type Edge, type Node } from "vis-network/standalone"
     import GraphProjectInputfield from "@/components/forms/form_components/fields/GraphProjectInputfield.vue";
     import { GraphProjectRequests } from "@/services/httpServices/GraphProjectRequests.ts";
-    import { ApiClientConfigurator } from "@/services/httpServices/ApiClientConfigurator.ts";
+    import { apiClient } from "@/services/httpServices/ApiClientConfigurator.ts";
     import type { AxiosInstance } from "axios";
     
     const selectedAlgorithm = ref<Algorithm>("dijkstra")
@@ -40,9 +39,6 @@ import {reactive, ref} from 'vue'
     const graphDescription = ref<string>("")
     
     const selectedGraphCanvas = ref<HTMLCanvasElement | null>(null)
-
-    const apiInstance: ApiClientConfigurator = ApiClientConfigurator.getInstance();
-    const apiClient: AxiosInstance = apiInstance.getClient();
 
     function getObjectFromMap(): IGraphParametersObject {
         const distanceObject: IGraphParametersObject = { Distances: {} }
@@ -70,18 +66,32 @@ import {reactive, ref} from 'vue'
     }
     
     async function handleCreateProject(): Promise<void> {
-        console.log(distanceMap.value)
+        const blobGraphImage: Blob = await canvasToBlob();
+        console.log(graphName.value)
         const projRequest: IResponseOperationResult<null> = await GraphProjectRequests.createProject(
             apiClient,
             graphName.value,
             graphDescription.value,
             getObjectFromMap(),
-            selectedGraphType.value);
+            selectedGraphType.value,
+            blobGraphImage);
         if (projRequest.operation.isValid) {
             errorMessage.value = "Succesfully created";
         } else {
             errorMessage.value = projRequest.operation.errorMessage;
         }
+    }
+    
+    function canvasToBlob(): Promise<Blob> {
+        return new Promise<Blob>((resolve, reject) => {
+            if (selectedGraphCanvas.value) {
+                selectedGraphCanvas.value.toBlob((blob: Blob | null) => {
+                    blob ? resolve(blob) : reject(new Error("Blob not found"))
+                }, 'image/png')
+            } else {
+              reject(new Error("Canvas is not valid"))
+          }
+        });
     }
     
 </script>
@@ -90,6 +100,7 @@ import {reactive, ref} from 'vue'
     <form class="graph_processor_form" @submit.prevent>
         <GraphTypeSelector v-model:selectedGraphType="selectedGraphType" v-model:isGraphTypeSelected="isGraphTypeSelected"></GraphTypeSelector>
         <UserInputVertexField v-if="isGraphTypeSelected"
+                              v-model:selectedGraphCanvas="selectedGraphCanvas"
                               v-model:selectedGraphType="selectedGraphType"
                               v-model:distanceMap="distanceMap"
                               v-model:visEdges="visEdges"

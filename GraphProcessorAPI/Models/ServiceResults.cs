@@ -16,5 +16,11 @@
     {
         public string? TokenString { get; set; }
     }
+
+    public class ObjectStorageResult : ServiceResult
+    {
+        public string? ObjectKey { get; set; }
+        public string? PresignedUrlString { get; set; }
+    }
 }
  

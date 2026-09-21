@@ -1,23 +1,37 @@
-import axios, {type AxiosInstance} from 'axios';
+import { type AxiosInstance } from 'axios';
 import type {
     GraphType,
     ICreateProjectObject,
     IGraphParametersObject, IGraphProjectObject,
     IResponseOperationResult
 } from "@/models/interfacesAndTypes.ts";
-import {ApiClientConfigurator, ErrorHandler} from "@/services/httpServices/ApiClientConfigurator.ts";
+import { ErrorHandler } from "@/services/httpServices/ApiClientConfigurator.ts";
 
 export class GraphProjectRequests {
-
-    public static async createProject(projectClient: AxiosInstance, graphName: string, graphDescription: string, graphObject: IGraphParametersObject, graphType: GraphType): Promise<IResponseOperationResult<null>> {
+    
+    private static createFormData(newProjectObject: ICreateProjectObject): FormData {
+        const formData = new FormData();
+        formData.append("graphName", newProjectObject.graphName);
+        formData.append("graphDescription", newProjectObject.graphDescription);
+        formData.append("graphType", newProjectObject.graphType);
+        formData.append("graphStructure", JSON.stringify(newProjectObject.graphStructure));
+        formData.append("image", newProjectObject.image, `${crypto.randomUUID()}.png`);
+        return formData;
+    }
+    public static async createProject(projectClient: AxiosInstance, graphName: string, graphDescription: string, graphObject: IGraphParametersObject, graphType: GraphType, blobGraphImage: Blob): Promise<IResponseOperationResult<null>> {
         const newProjectObject: ICreateProjectObject = {
             graphName: graphName,
             graphDescription: graphDescription,
             graphType: graphType,
-            graphStructure: graphObject
+            graphStructure: graphObject,
+            image: blobGraphImage
         }
         try {
-            const response = await projectClient.post<null>("api/GraphProject", newProjectObject);
+             await projectClient.post<null>("api/GraphProject", this.createFormData(newProjectObject),{
+                headers: {
+                    "Content-Type": "multipart/form-data"
+                }
+            });
             return {
                 operation: {
                     isValid: true,

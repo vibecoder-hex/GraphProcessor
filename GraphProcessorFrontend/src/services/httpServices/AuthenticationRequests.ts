@@ -1,22 +1,10 @@
 import type { IResponseOperationResult, ILoginObject, IRegisterObject, IAuthenticationResultObject, IJwtPayloadComponent } from "@/models/interfacesAndTypes";
-import axios, {type AxiosInstance} from "axios";
-import { ApiClientConfigurator, ErrorHandler } from "@/services/httpServices/ApiClientConfigurator.ts";
-
-export interface IRegistrationRequests {
-    register(): Promise<IResponseOperationResult<IAuthenticationResultObject>>
-}
+import { type AxiosInstance } from "axios";
+import {  ErrorHandler } from "@/services/httpServices/ApiClientConfigurator.ts";
 
 export class LoginRequests {
-    private static getLoginObject(username: string, password: string): ILoginObject {
-        return {
-            username: username,
-            password: password
-        }
-    }
-    
 
-    public static async login(loginClient: AxiosInstance, username: string, password: string): Promise<IResponseOperationResult<IAuthenticationResultObject>> {
-        const loginObject: ILoginObject = this.getLoginObject(username, password);
+    public static async login(loginClient: AxiosInstance, loginObject: ILoginObject): Promise<IResponseOperationResult<IAuthenticationResultObject>> {
         try {
             const response = await loginClient.post<IAuthenticationResultObject>(`api/User/login`, loginObject);
             return {
@@ -45,19 +33,10 @@ export class LoginRequests {
     }
 }
 
-export class RegistrationRequests implements IRegistrationRequests {
-    private readonly _registerClient: AxiosInstance
-    private readonly _userDataObject: IRegisterObject
-    
-    constructor(apiUrl: string, userDataObject: IRegisterObject) {
-        this._userDataObject = userDataObject
-        const apiInstance = ApiClientConfigurator.getInstance()
-        this._registerClient = apiInstance.getClient()
-    }
-    
-    public async register(): Promise<IResponseOperationResult<IAuthenticationResultObject>> {
+export class RegistrationRequests {
+    public static async register(registerClient: AxiosInstance, userDataObject: IRegisterObject): Promise<IResponseOperationResult<IAuthenticationResultObject>> {
         try {
-            const response = await this._registerClient.post(`api/User/register`, this._userDataObject);
+            const response = await registerClient.post<IAuthenticationResultObject>(`api/User/register`, userDataObject);
             return {
                 operation : {
                     isValid: true,

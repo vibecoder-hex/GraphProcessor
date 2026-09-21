@@ -1,4 +1,4 @@
-import axios, {type AxiosInstance} from 'axios'
+import {type AxiosInstance} from 'axios'
 import type { IGraphParametersObject, IResponseOperationResult, IDistanceProcessingRootObject, Algorithm } from "@/models/interfacesAndTypes.ts";
 import {ErrorHandler} from "@/services/httpServices/ApiClientConfigurator.ts";
 

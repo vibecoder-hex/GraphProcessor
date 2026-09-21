@@ -5,12 +5,14 @@
     import { useAuthenticationStore } from '@/stores/index.ts';
     import router from "@/router/index.ts";
     import { ref, reactive, computed } from "vue";
+    import { apiClient } from "@/services/httpServices/ApiClientConfigurator.ts";
 
     const authStore = useAuthenticationStore();
     
     const errorMessage = ref<string>("")
     
     const loginObject = reactive<ILoginObject>({ username: "", password: "" })
+    
   
     const isPasswordValid = computed(() => {
         return loginObject.password && loginObject.password.length > 6;
@@ -21,8 +23,7 @@
     })
 
     async function handleLogin(): Promise<void> {
-        const loginRequests = new LoginRequests(loginObject.username, loginObject.password);
-        const loginResponse: IResponseOperationResult<IAuthenticationResultObject> = await loginRequests.login();
+        const loginResponse = await LoginRequests.login(apiClient, loginObject);
         if (loginResponse.operation.isValid) {
             const accessToken: IAuthenticationResultObject | null = loginResponse.responseData;
             if (accessToken != null) {

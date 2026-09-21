@@ -44,7 +44,7 @@ builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IRegistrationService, RegistrationService>();
 builder.Services.AddScoped<IGraphProjectRepository, GraphProjectRepository>();
-builder.Services.AddScoped<IObjectStorageService, ObjectStorageService>();
+builder.Services.AddScoped<IStorageService, ObjectStorageService>();
 
 
 builder.Services.AddDbContextPool<GraphProcessorContext>(options =>

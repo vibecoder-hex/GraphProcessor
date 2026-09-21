@@ -1,6 +1,6 @@
-import axios, {type AxiosInstance} from "axios";
+import { type AxiosInstance } from "axios";
 import type { IOperationResult, IResponseOperationResult, IUserProfileData } from "@/models/interfacesAndTypes";
-import {ApiClientConfigurator, ErrorHandler} from "@/services/httpServices/ApiClientConfigurator.ts";
+import { ErrorHandler } from "@/services/httpServices/ApiClientConfigurator.ts";
 
 export class ProfileRequests  {
     public static async getAccountData(profileClient: AxiosInstance): Promise<IResponseOperationResult<IUserProfileData>> {

@@ -3,7 +3,7 @@ import { useAuthenticationStore } from "@/stores";
 import type { IJwtPayloadComponent, IBadRequestBody, IAuthenticationResultObject } from "@/models/interfacesAndTypes.ts";
 
 
-export interface IApiClientConfigurator {
+interface IApiClientConfigurator {
     getClient(): AxiosInstance
     
 }
@@ -116,7 +116,7 @@ export class ErrorHandler {
     }
 }
 
-export class ApiClientConfigurator implements IApiClientConfigurator {
+class ApiClientConfigurator implements IApiClientConfigurator {
     private readonly _instance: AxiosInstance;
     private static _clientInstance: ApiClientConfigurator | null = null
     
@@ -130,6 +130,7 @@ export class ApiClientConfigurator implements IApiClientConfigurator {
     
     public static getInstance(): ApiClientConfigurator {
         if (!ApiClientConfigurator._clientInstance) {
+            console.log('New api instance created')
             ApiClientConfigurator._clientInstance = new ApiClientConfigurator()
         }
         return ApiClientConfigurator._clientInstance;
@@ -209,3 +210,6 @@ export class ApiClientConfigurator implements IApiClientConfigurator {
         );
     }
 }
+
+const apiInstance: IApiClientConfigurator = new ApiClientConfigurator();
+export const apiClient = apiInstance.getClient();

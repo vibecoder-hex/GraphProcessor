@@ -6,7 +6,7 @@
     import { LoginRequests } from "@/services/httpServices/AuthenticationRequests.ts";
     import { ref } from 'vue'
     import { useAuthenticationStore } from '@/stores';
-    import {ApiClientConfigurator} from "@/services/httpServices/ApiClientConfigurator.ts";
+    import { apiClient } from "@/services/httpServices/ApiClientConfigurator.ts";
     import type {AxiosInstance} from "axios";
     
 
@@ -14,9 +14,6 @@
     const accountDataObject = ref<IUserProfileData | null>(null)
     
     const authStore = useAuthenticationStore()
-
-    const apiInstance: ApiClientConfigurator = ApiClientConfigurator.getInstance();
-    const apiClient: AxiosInstance = apiInstance.getClient()
 
     async function loadProfile() {
         const response: IResponseOperationResult<IUserProfileData> = await ProfileRequests.getAccountData(apiClient);

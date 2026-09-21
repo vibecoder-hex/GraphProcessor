@@ -17,6 +17,8 @@
         public Dictionary<string, Dictionary<string, int>> Structure { get; set; } = null!;
 
         public GraphType Type { get; set; }
+        
+        public string Image { get; set; }
 
         public int UserId { get; set; }
 
