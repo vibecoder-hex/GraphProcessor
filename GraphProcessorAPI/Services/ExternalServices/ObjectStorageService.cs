@@ -8,6 +8,7 @@ public interface IStorageService
 {
     Task<ObjectStorageResult> UploadFileAsync(IFormFile file);
     Task<ObjectStorageResult> GetPrivateFileUrl(string objectKey);
+    Task<ObjectStorageResult> DeleteFileAsync(string objectKey);
 }
 
 public class ObjectStorageService : IStorageService
@@ -31,15 +32,16 @@ public class ObjectStorageService : IStorageService
         string objectKey = $"{formatedDate}/{file.FileName}";
         await using (var stream = file.OpenReadStream())
         {
-            var objectRequest = new PutObjectRequest
-            {
-                BucketName = _bucketName,
-                Key = objectKey,
-                ContentType = file.ContentType,
-                InputStream = stream
-            };
             try
             {
+                var objectRequest = new PutObjectRequest
+                {
+                    BucketName = _bucketName,
+                    Key = objectKey,
+                    ContentType = file.ContentType,
+                    InputStream = stream
+                };
+                
                 await _s3Client.PutObjectAsync(objectRequest);
                 return new ObjectStorageResult { IsValid = true, ObjectKey = objectKey };
             }
@@ -52,20 +54,39 @@ public class ObjectStorageService : IStorageService
 
     public async Task<ObjectStorageResult> GetPrivateFileUrl(string objectKey)
     {
-        var request = new GetPreSignedUrlRequest
-        {
-            BucketName = _bucketName,
-            Key = objectKey,
-            Expires = DateTime.UtcNow.AddHours(2)
-        };
         try
         {
+            var request = new GetPreSignedUrlRequest
+            {
+                BucketName = _bucketName,
+                Key = objectKey,
+                Expires = DateTime.UtcNow.AddHours(2)
+            };
+            
             string fileUrl = await _s3Client.GetPreSignedURLAsync(request);
             return new ObjectStorageResult { IsValid = true, PresignedUrlString = fileUrl };
         }
         catch (AmazonS3Exception ex)
         {
             return new ObjectStorageResult { IsValid = false, ErrorMessage = ex.Message };
+        }
+    }
+
+    public async Task<ObjectStorageResult> DeleteFileAsync(string objectKey)
+    {
+        try
+        {
+            var request = new DeleteObjectRequest
+            {
+                BucketName = _bucketName,
+                Key = objectKey
+            };
+            await _s3Client.DeleteObjectAsync(request);
+            return new ObjectStorageResult { IsValid = true };
+        }
+        catch (AmazonS3Exception ex)
+        {
+            return new  ObjectStorageResult { IsValid = false, ErrorMessage = ex.Message };
         }
     }
 }

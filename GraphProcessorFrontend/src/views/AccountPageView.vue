@@ -7,7 +7,6 @@
     import { ref } from 'vue'
     import { useAuthenticationStore } from '@/stores';
     import { apiClient } from "@/services/httpServices/ApiClientConfigurator.ts";
-    import type {AxiosInstance} from "axios";
     
 
     const errorMessage = ref<string>("")

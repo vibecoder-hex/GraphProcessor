@@ -9,10 +9,13 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using System.Text;
 using System.Text.Json.Serialization;
+using Amazon.Runtime;
 using Amazon.S3;
 
 var builder = WebApplication.CreateBuilder(args);
-var databaseConnectionString = builder.Configuration["ConnectionStrings:DefaultConnection"];
+
+string databaseConnectionString = builder.Configuration["ConnectionStrings:DefaultConnection"];
+
 builder.Services.AddControllers()
     .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
@@ -57,7 +60,21 @@ builder.Services.AddDbContextPool<GraphProcessorContext>(options =>
         }
     ));
 
-builder.Services.AddAWSService<IAmazonS3>(builder.Configuration.GetAWSOptions());
+string awsRegion = builder.Configuration["AWS:Region"];
+string awsServiceUrl = builder.Configuration["AWS:ServiceUrl"];
+string awsAccessKey = builder.Configuration["AWS:AccessKey"];
+string awsSecretKey = builder.Configuration["AWS:SecretKey"];
+
+var credentials = new BasicAWSCredentials(awsAccessKey, awsSecretKey);
+var s3Config = new AmazonS3Config
+{
+    ServiceURL = awsServiceUrl,
+    AuthenticationRegion = awsRegion,
+    ForcePathStyle = true,
+};
+s3Config.ServiceURL = awsServiceUrl;
+s3Config.ForcePathStyle = true;
+builder.Services.AddSingleton<IAmazonS3>(new AmazonS3Client(credentials, s3Config));
 
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

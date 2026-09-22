@@ -71,4 +71,46 @@ export class GraphProjectRequests {
             }
         }
     }
+    
+    public static async getSelectedProject(projectClient: AxiosInstance, graphName: string): Promise<IResponseOperationResult<IGraphProjectObject>> {
+        try {
+            const response = await projectClient.get<IGraphProjectObject>(`/api/GraphProject/Selected`, {params: {graphName: graphName}});
+            return {
+                operation: {
+                    isValid: true,
+                    errorMessage: ""
+                },
+                responseData: response.data
+            }
+        } catch (error) {
+            return {
+                operation: {
+                    isValid: false,
+                    errorMessage: ErrorHandler.handleError(error)
+                },
+                responseData: null
+            }
+        }
+    }
+    
+    public static async deleteSelectedProject(projectClient: AxiosInstance, graphName: string): Promise<IResponseOperationResult<null>> {
+        try {
+            const response = await projectClient.delete<null>(`/api/GraphProject`, {params: {graphName: graphName}});
+            return {
+                operation: {
+                    isValid: true,
+                    errorMessage: ""
+                },
+                responseData: null
+            }
+        } catch (error) {
+            return {
+                operation: {
+                    isValid: false,
+                    errorMessage: ErrorHandler.handleError(error)
+                },
+                responseData: null
+            }
+        }
+    }
 }

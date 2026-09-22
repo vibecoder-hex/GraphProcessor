@@ -93,5 +93,6 @@ export interface IGraphProjectObject {
     graphType: GraphType,
     createdAt: string,
     graphStrucutre: IDistanceStructureObject,
-    imageKey: string
+    imageKey: string,
+    imagePresignedUrl: string,
 }

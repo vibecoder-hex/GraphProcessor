@@ -58,9 +58,7 @@ public class GraphProjectController : ControllerBase
                 );
                 return Ok(new { Message = "Successfully added graph project" });
             }
-
-            return StatusCode(500, "Internal server error(storage result is not valid)");
-
+            return StatusCode(500, storageUploadResult.ErrorMessage);
         } 
         return Unauthorized(new { Error = "Username does not found in http context" });
         
@@ -78,10 +76,7 @@ public class GraphProjectController : ControllerBase
             IEnumerable<Task<ProjectViewDto>> tasks = projectList.Select(async project =>
                 {
                     var urlGeneratingResult = await _storageService.GetPrivateFileUrl(project.ImageKey);
-                    if (urlGeneratingResult.IsValid)
-                    {
-                        project.ImageKey = urlGeneratingResult.PresignedUrlString ?? string.Empty;
-                    }
+                    project.ImagePresignedUrl = urlGeneratingResult.IsValid ? urlGeneratingResult.PresignedUrlString : string.Empty;
                     return project;
                 });
             var updatedProjectList = await Task.WhenAll(tasks);
@@ -90,41 +85,45 @@ public class GraphProjectController : ControllerBase
         return Unauthorized(new { Error = "Username does not found in http context" });
     }
 
-    [HttpGet("graphName")]
-    public async Task<IActionResult> GetProjectByName(string graphName)
+    [HttpGet("Selected")]
+    public async Task<IActionResult> GetProjectByName([FromQuery] string graphName)
     {
+        _logger.LogInformation(graphName);
         string claimUserId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
         if (int.TryParse(claimUserId, out int userId))
         {
             var graphProject = await _projectRepository.GetGraphProjectAsync(userId, graphName);
             if (graphProject == null)
                 return NotFound();
-            return Ok(graphProject);
+            
+            var urlGeneratingResult = await _storageService.GetPrivateFileUrl(graphProject.ImageKey);
+            if (urlGeneratingResult.IsValid)
+            {
+                graphProject.ImagePresignedUrl = urlGeneratingResult.PresignedUrlString ?? string.Empty;
+                return Ok(graphProject);
+            }
+            return StatusCode(500, urlGeneratingResult.ErrorMessage);
         }
         return Unauthorized(new { Error = "Username does not found in http context" });
     }
 
-    [HttpDelete("graphName")]
-    public async Task<IActionResult> DeleteProjectByName(string graphName)
+    [HttpDelete]
+    public async Task<IActionResult> DeleteProjectByName([FromQuery] string graphName)
     {
         string claimUserId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
         if (int.TryParse(claimUserId, out int userId))
         {
             var existingProject = await _projectRepository.GetGraphProjectAsync(userId, graphName);
             if (existingProject == null)
+                return NotFound();
+            
+            var objectDeleteResult = await _storageService.DeleteFileAsync(existingProject.ImageKey);
+            if (objectDeleteResult.IsValid)
             {
-                return BadRequest(new
-                {
-                    title = "Project deletion failed",
-                    errors = new
-                    {
-                        Details = new[] {$"Graph with name {graphName} is not found"}
-                    }
-                });
+                await _projectRepository.DeleteGraphProjectAsync(userId, graphName);
+                return Ok(new { Message = "Successfully deleted graph project" });
             }
-
-            await _projectRepository.DeleteGraphProjectAsync(userId, graphName);
-            return  Ok(new { Message = "Successfully deleted graph project" });
+            return StatusCode(500, "Internal server error(storage result is not valid)");
         }
         return Unauthorized(new { Error = "Username does not found in http context" });
     }

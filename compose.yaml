@@ -11,6 +11,12 @@
        JwtParams__SecretKey: "${JWTPARAMS_SECRET_KEY}"
        JwtParams__Issuer: "${JWTPARAMS_ISSUER}"
        JwtParams__Audience: "${JWTPARAMS_AUDIENCE}"
+       AWS__Region: "${AWS_REGION}"
+       AWS__ServiceURL: "${AWS_ServiceURL}"
+       AWS__AccessKey: "${AWS_ACCESS_KEY_ID}"
+       AWS__SecretKey: "${AWS_SECRET_ACCESS_KEY}"
+       AWS__BucketName: "${AWS_BucketName}"
+
     restart: unless-stopped
   
   graphprocessorfrontend:

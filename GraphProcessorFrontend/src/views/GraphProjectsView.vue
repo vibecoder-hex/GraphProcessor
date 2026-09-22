@@ -1,11 +1,10 @@
 <template>
     <div class="graph-projects-view">
-        <div v-for="project in projectList">
-          <div class="card">
+        <RouterLink :to="{name: 'ProjectDetails', params: {graphName: project.graphName}}" v-for="project in projectList" class="card">
             <div class="card-image">
               <figure class="image is-3by2">
                 <img
-                    :src="project.imageKey"
+                    :src="project.imagePresignedUrl"
                     alt="Placeholder image"
                 />
               </figure>
@@ -23,8 +22,7 @@
                 <time>{{ new Date(project.createdAt).toUTCString() }}</time>
               </div>
             </div>
-          </div>
-        </div>
+          </RouterLink>
     </div>
     <p>{{ errorMessage }}</p>
 </template>

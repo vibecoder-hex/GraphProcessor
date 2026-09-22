@@ -10,5 +10,5 @@ public record ProjectViewDto(
     string ImageKey,
     DateTime CreatedAt)
 {
-    public string ImageKey { get; set; } = ImageKey;
+    public string ImagePresignedUrl { get; set; } = ImageKey;
 };
