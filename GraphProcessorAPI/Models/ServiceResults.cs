@@ -22,5 +22,11 @@
         public string? ObjectKey { get; set; }
         public string? PresignedUrlString { get; set; }
     }
+
+    public class ProjectManagementResult : ServiceResult
+    {
+        public ProjectViewDto? ProjectViewModel { get; set; }
+        public List<ProjectViewDto>? Projects { get; set; }
+    }
 }
  

@@ -2,7 +2,7 @@
     import { ref } from 'vue'
     import { apiClient } from "@/services/httpServices/ApiClientConfigurator.ts";
     import type {IGraphProjectObject, IResponseOperationResult} from "@/models/interfacesAndTypes.ts";
-    import {GraphProjectRequests} from "@/services/httpServices/GraphProjectRequests.ts";
+    import { GraphProjectRequests } from "@/services/httpServices/GraphProjectRequests.ts";
     import router from "@/router";
 
     interface IProps {
@@ -45,18 +45,32 @@
 </script>
 
 <template>
-    <div class="selected-graph-project" v-if="graphProjectObject">
-        <h1 class="is-size-3">{{ graphProjectObject.graphName }}</h1>
+    <article class="message is-primary" v-if="graphProjectObject">
+      <div class="message-header">
+          <p>{{ graphProjectObject.graphName }}</p>
+          <div>
+              Delete project
+              <button class="delete" aria-label="delete" @click="handleDeleteProject()"></button>
+          </div>
+      </div>
+      <div class="message-body">
         <figure class="image is-3by2">
             <img :src="graphProjectObject.imagePresignedUrl" alt="placeholder image">
         </figure>
-        <p>{{ graphProjectObject.graphDescription }}</p>
-        <time>{{graphProjectObject.createdAt}}</time>
-        <button @click="handleDeleteProject()" class="button is-danger">Delete project</button>
-    </div>
+        {{ graphProjectObject.graphDescription }}
+        <strong>Created at: {{graphProjectObject.createdAt}}</strong>
+      </div>
+    </article>
     <p>{{ errorMessage }}</p>
 </template>
 
 <style scoped>
-
+    .message {
+        width: 90%;
+        margin: 0 auto;
+    }
+    .message-body {
+        display: flex;
+        flex-direction: column;
+    }
 </style>

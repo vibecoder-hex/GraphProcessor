@@ -5,7 +5,7 @@ namespace GraphProcessorAPI.Repositories;
 
 public interface IGraphProjectRepository
 {
-    Task<Graph?> AddGraphProjectAsync(int userId, string graphName, string graphDescription, GraphType graphType, Dictionary<string, Dictionary<string, int>> graphStructure, string imageFilename);
+    Task<ProjectViewDto?> AddGraphProjectAsync(int userId, string graphName, string graphDescription, GraphType graphType, Dictionary<string, Dictionary<string, int>> graphStructure, string imageFilename);
     Task<List<ProjectViewDto>> GetGraphProjectsAsync(int userId);
     Task<ProjectViewDto?> GetGraphProjectAsync(int userId, string graphName);
     Task DeleteGraphProjectAsync(int userId, string graphName);
@@ -20,7 +20,7 @@ public class GraphProjectRepository : IGraphProjectRepository
         _dbContext = dbContext;
     }
 
-    public async Task<Graph?> AddGraphProjectAsync(int userId, string graphName, string graphDescription,
+    public async Task<ProjectViewDto?> AddGraphProjectAsync(int userId, string graphName, string graphDescription, 
         GraphType graphType, Dictionary<string, Dictionary<string, int>> graphStructure, string imageFilename)
     {
         var graph = new Graph()
@@ -35,7 +35,7 @@ public class GraphProjectRepository : IGraphProjectRepository
         };
         _dbContext.Graphs.Add(graph);
         await _dbContext.SaveChangesAsync();
-        return graph;
+        return new ProjectViewDto(graph.Name, graph.Description, graph.Type, new DistanceDataJsonDTO(graph.Structure), graph.Image, graph.Creationat);
     }
 
     public async Task<List<ProjectViewDto>> GetGraphProjectsAsync(int userId)

@@ -3,8 +3,7 @@ using System.Text.Json;
 using GraphProcessorAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using GraphProcessorAPI.Repositories;
-using GraphProcessorAPI.Services.ExternalServices;
+using GraphProcessorAPI.Services;
 
 namespace GraphProcessorAPI.Controllers;
 
@@ -13,15 +12,13 @@ namespace GraphProcessorAPI.Controllers;
 [Authorize]
 public class GraphProjectController : ControllerBase
 {
-    private readonly IGraphProjectRepository _projectRepository;
+    private readonly IProjectManagementService _projectService;
     private readonly ILogger<GraphProjectController> _logger;
-    private readonly IStorageService _storageService;
 
-    public GraphProjectController(IGraphProjectRepository projectRepository,  ILogger<GraphProjectController> logger,  IStorageService storageService)
+    public GraphProjectController(IProjectManagementService projectService, ILogger<GraphProjectController> logger)
     {
-        _projectRepository = projectRepository;
+        _projectService = projectService;
         _logger = logger;
-        _storageService = storageService;
     }
 
     [HttpPost]
@@ -32,33 +29,26 @@ public class GraphProjectController : ControllerBase
         
         if (int.TryParse(claimUserId, out int userId) && graphStructure != null)
         {
-            var existingProject = await _projectRepository.GetGraphProjectAsync(userId, dto.GraphName);
-            if (existingProject != null)
-            {
-                return BadRequest(new
-                {
-                    title = "Project creation failed",
-                    errors = new
-                    {
-                        Details = new[] {$"Graph with name {dto.GraphName} already exists"}
-                    }
-                });
-            }
-
-            var storageUploadResult = await _storageService.UploadFileAsync(dto.Image);
-            if (storageUploadResult.IsValid)
-            {
-                await _projectRepository.AddGraphProjectAsync(
-                    int.Parse(claimUserId),
-                    dto.GraphName,
-                    dto.GraphDescription,
-                    dto.GraphType,
-                    graphStructure.Distances,
-                    storageUploadResult.ObjectKey!
+            var createProjectResult = await _projectService.CreateProject(
+                userId,
+                dto.GraphName,
+                dto.GraphDescription,
+                dto.GraphType,
+                graphStructure.Distances,
+                dto.Image
                 );
-                return Ok(new { Message = "Successfully added graph project" });
-            }
-            return StatusCode(500, storageUploadResult.ErrorMessage);
+            
+            if (createProjectResult.IsValid)
+                return Ok(new { Message = "Successfully created graph project" });
+            
+            return BadRequest(new
+            {
+                title = "Project creation failed",
+                errors = new
+                {
+                    Details = new[] { createProjectResult.ErrorMessage }
+                }
+            });
         } 
         return Unauthorized(new { Error = "Username does not found in http context" });
         
@@ -71,16 +61,17 @@ public class GraphProjectController : ControllerBase
         
         if (int.TryParse(claimUserId, out int userId))
         {
-            List<ProjectViewDto> projectList = await _projectRepository.GetGraphProjectsAsync(userId);
-            
-            IEnumerable<Task<ProjectViewDto>> tasks = projectList.Select(async project =>
+            var projectGetResult = await _projectService.GetProjects(userId);
+            if (projectGetResult.IsValid)
+                return Ok(projectGetResult.Projects);
+            return BadRequest(new
+            {
+                title = "Project getting failed",
+                errors = new
                 {
-                    var urlGeneratingResult = await _storageService.GetPrivateFileUrl(project.ImageKey);
-                    project.ImagePresignedUrl = urlGeneratingResult.IsValid ? urlGeneratingResult.PresignedUrlString : string.Empty;
-                    return project;
-                });
-            var updatedProjectList = await Task.WhenAll(tasks);
-            return  Ok(updatedProjectList);
+                    Details = new[] { projectGetResult.ErrorMessage }
+                }
+            });
         }
         return Unauthorized(new { Error = "Username does not found in http context" });
     }
@@ -92,17 +83,18 @@ public class GraphProjectController : ControllerBase
         string claimUserId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
         if (int.TryParse(claimUserId, out int userId))
         {
-            var graphProject = await _projectRepository.GetGraphProjectAsync(userId, graphName);
-            if (graphProject == null)
-                return NotFound();
+            var projectGetResult = await _projectService.GetSelectedProject(userId, graphName);
+            if (projectGetResult.IsValid)
+                return Ok(projectGetResult.ProjectViewModel);
             
-            var urlGeneratingResult = await _storageService.GetPrivateFileUrl(graphProject.ImageKey);
-            if (urlGeneratingResult.IsValid)
+            return BadRequest(new
             {
-                graphProject.ImagePresignedUrl = urlGeneratingResult.PresignedUrlString ?? string.Empty;
-                return Ok(graphProject);
-            }
-            return StatusCode(500, urlGeneratingResult.ErrorMessage);
+                title = "Project getting failed",
+                errors = new
+                {
+                    Details = new[] { projectGetResult.ErrorMessage }
+                }
+            });
         }
         return Unauthorized(new { Error = "Username does not found in http context" });
     }
@@ -113,17 +105,19 @@ public class GraphProjectController : ControllerBase
         string claimUserId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
         if (int.TryParse(claimUserId, out int userId))
         {
-            var existingProject = await _projectRepository.GetGraphProjectAsync(userId, graphName);
-            if (existingProject == null)
-                return NotFound();
+            var projectDeletionResult = await _projectService.DeleteProject(userId, graphName);
+            if (projectDeletionResult.IsValid)
+                return Ok(new {Message = "Successfully deleted graph project"});
             
-            var objectDeleteResult = await _storageService.DeleteFileAsync(existingProject.ImageKey);
-            if (objectDeleteResult.IsValid)
+            return BadRequest(new
             {
-                await _projectRepository.DeleteGraphProjectAsync(userId, graphName);
-                return Ok(new { Message = "Successfully deleted graph project" });
-            }
-            return StatusCode(500, "Internal server error(storage result is not valid)");
+                title = "Project getting failed",
+                errors = new
+                {
+                    Details = new[] { projectDeletionResult.ErrorMessage }
+                }
+            });
+            
         }
         return Unauthorized(new { Error = "Username does not found in http context" });
     }

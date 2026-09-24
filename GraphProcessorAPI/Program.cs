@@ -48,6 +48,7 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IRegistrationService, RegistrationService>();
 builder.Services.AddScoped<IGraphProjectRepository, GraphProjectRepository>();
 builder.Services.AddScoped<IStorageService, ObjectStorageService>();
+builder.Services.AddScoped<IProjectManagementService, ProjectManagementService>();
 
 
 builder.Services.AddDbContextPool<GraphProcessorContext>(options =>

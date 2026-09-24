@@ -1,5 +1,5 @@
 <template>
-    <div class="graph-projects-view">
+    <div class="graph-projects-view" v-if="projectList.length > 0">
         <RouterLink :to="{name: 'ProjectDetails', params: {graphName: project.graphName}}" v-for="project in projectList" class="card">
             <div class="card-image">
               <figure class="image is-3by2">
@@ -24,6 +24,10 @@
             </div>
           </RouterLink>
     </div>
+    <div v-else>
+        <h1 class="is-size-4">The list of projects is empty</h1>
+        <button class="button is-success" @click="router.push('/')">Create new project</button>
+    </div>
     <p>{{ errorMessage }}</p>
 </template>
 
@@ -32,6 +36,7 @@
     import { ref } from "vue"
     import type { IGraphProjectObject } from "@/models/interfacesAndTypes.ts";
     import  { apiClient } from "@/services/httpServices/ApiClientConfigurator.ts";
+    import router from "@/router/index.ts";
     
     const errorMessage = ref<string>("");
     const projectList = ref<IGraphProjectObject[]>([]);
@@ -49,9 +54,25 @@
 </script>
 
 <style scoped>
-  .graph-projects-view {
-      display: grid;
-      grid-template-columns: auto auto auto;
-      grid-gap: 20px;
+    @media(min-width: 800px) {
+        .graph-projects-view {
+            display: grid;
+            grid-template-columns: auto auto auto;
+            grid-gap: 20px;
+        }
+    }
+  
+  @media(max-width: 720px) {
+      .graph-projects-view {
+          display: flex;
+          flex-direction: column;
+      }
   }
+  
+  .graph-projects-view {
+      margin: 0 auto;
+      width: 90%;
+      gap: 10px;
+  }
+
 </style>
