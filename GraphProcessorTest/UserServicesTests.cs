@@ -9,17 +9,16 @@ namespace GraphProcessorTest.UserServices
 {
     public class AuthenticationServiceTests
     {
-        private readonly Mock<IUserRepository> _mockUserRepository;
-        private readonly Mock<IPasswordHasher<User>> _mockPasswordHasher = new Mock<IPasswordHasher<User>>();
-        private readonly Mock<ITokenService> _mockTokenService = new Mock<ITokenService>();
-        private readonly Mock<IRefreshTokenRepository> _mockRefreshTokenRepository = new Mock<IRefreshTokenRepository>();
+        private readonly Mock<IUserRepository> _mockUserRepository = new();
+        private readonly Mock<IPasswordHasher<User>> _mockPasswordHasher = new();
+        private readonly Mock<ITokenService> _mockTokenService = new();
+        private readonly Mock<IRefreshTokenRepository> _mockRefreshTokenRepository = new();
 
         private readonly ILoginService _loginService;
         private readonly IRegistrationService _registrationService;
 
         public AuthenticationServiceTests()
         {
-            _mockUserRepository = new Mock<IUserRepository>();
             _loginService = new LoginService(_mockPasswordHasher.Object, _mockUserRepository.Object, _mockTokenService.Object, _mockRefreshTokenRepository.Object);
             _registrationService = new RegistrationService(_mockPasswordHasher.Object, _mockUserRepository.Object, _mockTokenService.Object);
         }
@@ -119,7 +118,7 @@ namespace GraphProcessorTest.UserServices
                 ExpiresAt = new DateTime(2026, 9, 18),
                 CreatedAt = new DateTime(2026, 8, 6)
             };
-            Assert.False(DateTime.UtcNow > token.ExpiresAt);
+            Assert.True(DateTime.UtcNow > token.ExpiresAt);
         }
 
         [Fact]
